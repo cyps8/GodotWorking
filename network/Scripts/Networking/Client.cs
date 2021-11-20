@@ -17,22 +17,22 @@ public class Client : Node
     private static bool connected = false;
     public override void _Ready()
     {
-        port = 42069;
+        // port = 42069;
 
-        client = new TcpClient();
+        // client = new TcpClient();
 
-        client.Connect("127.0.0.1", port);
+        // client.Connect("127.0.0.1", port);
 
-        string message = "pog! yoooooo"; 
+        // string message = "pog! yoooooo"; 
 
-        bytes = Encoding.ASCII.GetBytes(message);
+        // bytes = Encoding.ASCII.GetBytes(message);
 
-        stream = client.GetStream();
+        // stream = client.GetStream();
 
-        // Send the message to the connected TcpServer.
-        stream.Write(bytes, 0, bytes.Length);
+        // // Send the message to the connected TcpServer.
+        // stream.Write(bytes, 0, bytes.Length);
 
-        Console.WriteLine($"Sent: {message}");
+        // Console.WriteLine($"Sent: {message}");
     }
 
     private void ConnectCallback(IAsyncResult _result)

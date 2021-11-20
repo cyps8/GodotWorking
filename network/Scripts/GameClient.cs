@@ -10,6 +10,6 @@ public class GameClient : Node2D
 
     private void ButtonLeave()
     {
-        GetTree().ChangeScene("res://Scenes/Main.tscn");
+        GetNode<Node>("/root/MasterScene").Call("GoToMenu");
     }
 }

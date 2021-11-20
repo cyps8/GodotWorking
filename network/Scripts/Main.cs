@@ -10,11 +10,11 @@ public class Main : Node2D
 
 	private void ButtonHostPressed()
 	{
-		GetTree().ChangeScene("res://Scenes/Server.tscn");
+		GetNode<Node>("/root/MasterScene").Call("StartServer");
 	}
 
 	private void ButtonClientPressed()
 	{
-		GetTree().ChangeScene("res://Scenes/Client.tscn");
+		GetNode<Node>("/root/MasterScene").Call("StartClient");
 	}
 }
