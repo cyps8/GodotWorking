@@ -3,9 +3,12 @@ using System;
 
 public class SceneManager : Node
 {
+    public static bool isServer;
+    public static string username;
     public override void _Ready()
     {
-
+        username = "";
+        isServer = false;
     }
 
     public void GotoScene(string path)
@@ -19,6 +22,7 @@ public class SceneManager : Node
     public void StartServer()
     {
         GotoScene("res://Scenes/Server.tscn");
+        isServer = true;
     }
 
     public void StartClient()
@@ -29,5 +33,6 @@ public class SceneManager : Node
     public void GoToMenu()
     {
         GotoScene("res://Scenes/Main.tscn");
+        isServer = false;
     }
 }

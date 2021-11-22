@@ -10,19 +10,13 @@ public class Server : Node
 	private static int port;
 
 	private static TcpListener tcpListener;
-	//private static TcpClient[] client = new TcpClient[4];
     
-	private List<Connection> connections = new List<Connection>();
-    
-	public static int bufferSize = 4096;
-	private static Byte[] bytes;
-	private static String data;
-	private static NetworkStream[] stream = new NetworkStream[4];
-	private static bool connected = false;
+	public static List<Connection> connections = new List<Connection>();
+	public delegate void PacketHandler(int _fromClient, Packet _packet);
+    public static Dictionary<int, PacketHandler> packetHandlers;
 
-	private int maxPlayers;
+	public static int maxPlayers; // not including host
 
-	int counter; // temporary value
 
 	public void ServerStart()
 	{
@@ -33,18 +27,11 @@ public class Server : Node
 
 		GD.Print($"Server started on port: {port}.");
 
-		bytes = new Byte[4096];
-		data = null;
-
-		counter = 0;
-
 		maxPlayers = 3;
 
 		Init();
 
 		tcpListener.BeginAcceptTcpClient(new AsyncCallback(TCPConnectCallback), null);
-
-		
 	}
 
 	private void Init()
@@ -55,10 +42,22 @@ public class Server : Node
             connections.Insert(i, _connection);
 			connections[i].SetId(i);
         }
+
+		packetHandlers = new Dictionary<int, PacketHandler>()
+		{
+			{ (int)ClientPackets.welcomeReceived, DataManager.Handle.WelcomeReceived },
+			{ (int)ClientPackets.chatMsg, DataManager.Handle.ClientChatMsg },
+			// TODO: add packets to be handled by server.
+		};
 	}
 
 	private void TCPConnectCallback(IAsyncResult result)
 	{
+		if (tcpListener == null)
+		{
+			return;
+		}
+
 		TcpClient _client = tcpListener.EndAcceptTcpClient(result);
 		tcpListener.BeginAcceptTcpClient(new AsyncCallback(TCPConnectCallback), null);
 
@@ -74,80 +73,16 @@ public class Server : Node
 
 		GD.Print($"Failed to connect: {_client.Client.RemoteEndPoint}, Server full");
 
-		
-
-		// client[counter] = _client;
-		// stream[counter] = client[counter].GetStream();
-		// stream[counter].BeginRead(bytes, 0 ,bufferSize, ReceiveCallback, null);
-		// connected = true;
-
-		//counter++;
 	}
-
-	public override void _Process(float delta)
-	{
-		//GD.Print($"Connections: {connections.Count}");
-		// if (connected == true)
-		// {
-		//     int i;
-
-		//     // Loop to receive all the data sent by the client.
-		//     while((i = stream.Read(bytes, 0, bytes.Length))!=0)
-		//     {
-		//         // Translate data bytes to a ASCII string.
-		//         data = System.Text.Encoding.ASCII.GetString(bytes, 0, i);
-		//         Console.WriteLine("Received: {0}", data);
-
-		//         // Process the data sent by the client.
-		//         data = data.ToUpper();
-
-		//         GD.Print($"Received: {data}");
-
-		//         byte[] msg = System.Text.Encoding.ASCII.GetBytes(data);
-
-		//         // Send back a response.
-		//         stream.Write(msg, 0, msg.Length);
-		//         Console.WriteLine("Sent: {0}", data);
-		//     }
-		// }
-	}
-
-	private void ReceiveCallback(IAsyncResult _result)
-	{
-		try
-		{
-			int byteLength = stream[0].EndRead(_result);
-			if (byteLength <= 0)
-			{
-				Disconnect();
-				return;
-			}
-
-			byte[] _data = new byte[byteLength];
-			Array.Copy(bytes, _data, byteLength);
-
-			//receivedPacket.Reset(HandleData(_data));
-			stream[0].BeginRead(bytes, 0, bufferSize, ReceiveCallback, null);
-		}
-		catch (Exception ex)
-		{
-			GD.PrintErr($"Error receiving TCP data: {ex}");
-			Disconnect();
-		}
-	}
-
 	public void ServerStop()
 	{
+		for (int i = 0; i <= maxPlayers; i++)
+        {
+			if (connections[i].IsConnected())
+			connections[i].Disconnect();
+        }
+
 		tcpListener.Stop();
-	}
-
-	private void Disconnect()
-	{
-		//GD.Print($"{.Client.RemoteEndPoint} has disco netted.");
-
-		//client[0].Close();
-		//udp.Disconnect();
-
-		//Send.PlayerDisconnected(id);
+		tcpListener = null;
 	}
 }

@@ -1,3 +1,46 @@
-[gd_scene format=2]
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://Scripts/TextBox.cs" type="Script" id=1]
 
 [node name="Game" type="Node2D"]
+
+[node name="HUD" type="CanvasLayer" parent="."]
+
+[node name="TextBox" type="Node" parent="HUD"]
+script = ExtResource( 1 )
+
+[node name="NoText" type="TextureButton" parent="HUD/TextBox"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextInput" type="LineEdit" parent="HUD/TextBox"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 21.0
+margin_top = -43.0
+margin_right = 308.0
+margin_bottom = -19.0
+caret_blink = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="TextBox" type="RichTextLabel" parent="HUD/TextBox"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 22.0
+margin_top = -171.0
+margin_right = 307.0
+margin_bottom = -46.0
+focus_mode = 2
+scroll_following = true
+selection_enabled = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="focus_entered" from="HUD/TextBox/TextInput" to="HUD/TextBox" method="FocusEnter"]
+[connection signal="focus_exited" from="HUD/TextBox/TextInput" to="HUD/TextBox" method="FocusExit"]

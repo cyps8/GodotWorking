@@ -7,12 +7,12 @@ public class GameServer : Node2D
     public override void _Ready()
     {
         server = GetNode<Server>("ServerManager");
-        //server.ServerStart();
+        server.ServerStart();
     }
 
     private void ButtonLeave()
     {
-        //server.ServerStop();
+        server.ServerStop();
         GetNode<Node>("/root/MasterScene").Call("GoToMenu");
     }
 }
