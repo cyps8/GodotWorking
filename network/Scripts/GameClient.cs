@@ -21,6 +21,6 @@ public class GameClient : Node2D
 
     private void ButtonLeave()
     {
-        GetNode<Node>("/root/MasterScene/Client/ClientManager").Call("Disconnect");
+        GetNode<Node>("/root/MasterScene/Client/ClientManager").CallDeferred("Disconnect");
     }
 }

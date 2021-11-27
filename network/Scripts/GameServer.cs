@@ -13,6 +13,6 @@ public class GameServer : Node2D
     private void ButtonLeave()
     {
         server.ServerStop();
-        GetNode<Node>("/root/MasterScene").Call("GoToMenu");
+        GetNode<Node>("/root/MasterScene").CallDeferred("GoToMenu");
     }
 }

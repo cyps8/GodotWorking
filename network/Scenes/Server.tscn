@@ -1,8 +1,7 @@
-[gd_scene load_steps=5 format=2]
+[gd_scene load_steps=4 format=2]
 
 [ext_resource path="res://Scripts/GameServer.cs" type="Script" id=1]
 [ext_resource path="res://Scripts/Networking/Server.cs" type="Script" id=2]
-[ext_resource path="res://icon.png" type="Texture" id=3]
 [ext_resource path="res://Scenes/Game.tscn" type="PackedScene" id=4]
 
 [node name="Server" type="Node2D"]
@@ -24,9 +23,5 @@ __meta__ = {
 
 [node name="ServerManager" type="Node" parent="."]
 script = ExtResource( 2 )
-
-[node name="Icon" type="Sprite" parent="."]
-position = Vector2( 561.583, 317.147 )
-texture = ExtResource( 3 )
 
 [connection signal="pressed" from="CanvasLayer/Button_Leave" to="." method="ButtonLeave"]

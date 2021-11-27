@@ -1,8 +1,24 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=9 format=2]
 
 [ext_resource path="res://Scripts/TextBox.cs" type="Script" id=1]
+[ext_resource path="res://Instances/UserPlayer.tscn" type="PackedScene" id=2]
+[ext_resource path="res://Scripts/GameManager.cs" type="Script" id=3]
+[ext_resource path="res://Instances/OtherPlayer.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Assets/Environment/tempback.png" type="Texture" id=5]
+[ext_resource path="res://Instances/Bullet.tscn" type="PackedScene" id=6]
+
+[sub_resource type="OccluderPolygon2D" id=2]
+cull_mode = 1
+polygon = PoolVector2Array( -92.5215, 118.739, -1.54712, 117.55, -0.279327, -122.316, 106.935, -123.157, 107.776, -150.066, -106.232, -150.066, -107.073, -124.839, -13.7337, -123.578, -14.0067, 103.783, -92.5842, 104.491 )
+
+[sub_resource type="OccluderPolygon2D" id=1]
+cull_mode = 1
+polygon = PoolVector2Array( -159.936, -181.29, 65.1687, -182.122, 65.8531, -195.339, -160.053, -195.983 )
 
 [node name="Game" type="Node2D"]
+script = ExtResource( 3 )
+otherPlayer = ExtResource( 4 )
+bullet = ExtResource( 6 )
 
 [node name="HUD" type="CanvasLayer" parent="."]
 
@@ -42,5 +58,26 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="UserPlayer" parent="." instance=ExtResource( 2 )]
+
+[node name="CanvasModulate" type="CanvasModulate" parent="."]
+color = Color( 0.454902, 0.454902, 0.454902, 1 )
+
+[node name="Tempback" type="Sprite" parent="."]
+position = Vector2( 326.998, 196.058 )
+scale = Vector2( 1.61062, 1.64429 )
+z_index = -1
+texture = ExtResource( 5 )
+
+[node name="LightOccluder2D2" type="LightOccluder2D" parent="Tempback"]
+position = Vector2( -298.844, -105.567 )
+scale = Vector2( 0.620879, 0.608165 )
+occluder = SubResource( 2 )
+
+[node name="LightOccluder2D" type="LightOccluder2D" parent="Tempback"]
+occluder = SubResource( 1 )
+
 [connection signal="focus_entered" from="HUD/TextBox/TextInput" to="HUD/TextBox" method="FocusEnter"]
 [connection signal="focus_exited" from="HUD/TextBox/TextInput" to="HUD/TextBox" method="FocusExit"]
+[connection signal="focus_entered" from="HUD/TextBox/TextBox" to="HUD/TextBox" method="TBEnter"]
+[connection signal="focus_exited" from="HUD/TextBox/TextBox" to="HUD/TextBox" method="TBExit"]

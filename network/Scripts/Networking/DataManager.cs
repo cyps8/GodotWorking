@@ -1,5 +1,7 @@
 using Godot;
 using System;
+using System.Net;
+using System.Net.Sockets;
 
 public class DataManager
 {
@@ -77,6 +79,19 @@ public class DataManager
             {
                 _packet.Write(_msg);
                 _packet.Write(_toClient);
+                
+                _packet.Write(GameManager.otherPlayers.Count + 1);
+
+                _packet.Write(-1);
+                _packet.Write(SceneManager.username);
+                _packet.Write(Player.position);
+
+                for (int i = 0; i < GameManager.otherPlayers.Count; i++)
+                {
+                    _packet.Write(GameManager.GetPlayerInfo(i).id);
+                    _packet.Write(GameManager.GetPlayerInfo(i).username);
+                    _packet.Write(GameManager.GetPlayerInfo(i).position);
+                }
 
                 ServerSendTCP(_toClient, _packet);
             }
@@ -87,7 +102,7 @@ public class DataManager
             using (Packet _packet = new Packet((int)ClientPackets.welcomeReceived))
             {
                 _packet.Write(Client.id);
-                //_packet.Write(); add string to be sent here
+                _packet.Write(SceneManager.username);
 
                 ClientSendTCP(_packet);
             }
@@ -131,21 +146,66 @@ public class DataManager
                 ClientSendTCP(_packet);
             }
         }
+
+        public static void NewPlayer(string _name, int _id, Vector2 _pos)
+        {
+            using (Packet _packet = new Packet((int)ServerPackets.newPlayer))
+            {
+                _packet.Write(_id);
+                _packet.Write(_name);
+                _packet.Write(_pos);
+
+                ServerSendTCPAll(_id, _packet);
+            }
+        }
+
+        public static void ServerMovement(Vector2 _pos)
+        {
+            using (Packet _packet = new Packet((int)ServerPackets.playerMovement))
+            {
+                _packet.Write(-1);
+                _packet.Write(_pos);
+
+                ServerSendUDPAll(_packet);
+            }
+        }
+
+        public static void ServerSpreadMovement(Vector2 _pos, int _id)
+        {
+            using (Packet _packet = new Packet((int)ServerPackets.playerMovement))
+            {
+                _packet.Write(_id);
+                _packet.Write(_pos);
+
+                ServerSendUDPAll(_id, _packet);
+            }
+        }
+
+        public static void ClientMovement(Vector2 _pos)
+        {
+            using (Packet _packet = new Packet((int)ClientPackets.playerMovement))
+            {
+                _packet.Write(Client.id);
+                _packet.Write(_pos);
+
+                ClientSendUDP(_packet);
+            }
+        }
     }
     public class Handle
     {
         public static void WelcomeReceived(int _fromClient, Packet _packet)
         {
-            int _clientIDCheck = _packet.ReadInt();
-            //string _username = _packet.ReadString(); add string to be reveived here
+            int clientIDCheck = _packet.ReadInt();
+            string username = _packet.ReadString();
 
             GD.Print($"{Server.connections[_fromClient].tcpClient.Client.RemoteEndPoint} connected successfully and is now player {_fromClient}.");
-            if (_fromClient != _clientIDCheck)
+            if (_fromClient != clientIDCheck)
             {
-                GD.Print($"Player (ID: {_fromClient}) has assumed the wrong client ID ({_clientIDCheck})!");
-                //GD.Print($"Player \"{_username}\" (ID: {_fromClient}) has assumed the wrong client ID ({_clientIDCheck})!");
+                GD.Print($"Player {username} (ID: {_fromClient}) has assumed the wrong client ID ({clientIDCheck})!");
             }
-            //Server.clients[_fromClient].SendIntoGame(_username);
+            GameManager.NewPlayer(_fromClient, username, new Vector2(0, 0));
+            Send.NewPlayer(username, _fromClient, new Vector2(0, 0));
         }
 
         public static void Welcome(Packet _packet)
@@ -155,17 +215,26 @@ public class DataManager
 
             GD.Print($"Message from server: {_msg}");
             Client.id = _id;
+
+            int newPlayers = _packet.ReadInt();
+
+            for (int i = 0; i < newPlayers; i++)
+            {
+                int id = _packet.ReadInt();
+                string username = _packet.ReadString();
+                Vector2 position = _packet.ReadVector2();
+                GameManager.NewPlayer(id, username, position);
+            }
+
             Send.WelcomeReceived();
 
-            //Client.ConnectUDP(((IPEndPoint)Client.tcpClient.Client.LocalEndPoint).Port);
+            Client.ConnectUDP(((IPEndPoint)Client.tcpClient.Client.LocalEndPoint).Port);
         }
 
         public static void PlayerDisconnected(Packet _packet)
         {
             int _id = _packet.ReadInt();
-
-            //GameManager.players[_id].QueueFree();
-            //GameManager.players.Remove(_id);
+            GameManager.DeletePlayer(_id);
         }
 
         public static void ClientChatMsg(int _fromClient, Packet _packet) // How a server handles a client chat message
@@ -182,6 +251,32 @@ public class DataManager
             string _msg = _packet.ReadString();
 
             TextBox.AddMsg(_msg);
+        }
+
+        public static void NewPlayer(Packet _packet) // How a client handles a new player
+        {
+            int id = _packet.ReadInt();
+            string username = _packet.ReadString();
+            Vector2 position = _packet.ReadVector2();
+            GameManager.NewPlayer(id, username, position);
+        }
+
+        public static void ClientMovement(int _fromClient, Packet _packet) // How a server handles client movement
+        {
+            int id = _packet.ReadInt();
+            Vector2 pos = _packet.ReadVector2();
+
+            GameManager.UpdatePlayerPos(id, pos);
+
+            Send.ServerSpreadMovement(pos, _fromClient);
+        }
+
+        public static void ServerMovement(Packet _packet) // How a client handles server movement
+        {
+            int id = _packet.ReadInt();
+            Vector2 pos = _packet.ReadVector2();
+
+            GameManager.UpdatePlayerPos(id, pos);
         }
     }
 }

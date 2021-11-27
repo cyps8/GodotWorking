@@ -6,17 +6,14 @@ using System.Net.Sockets;
 public class Connection
 {
     private int id;
-
     private NetworkStream stream;
-
     public TcpClient tcpClient;
-
+    public IPEndPoint udpEndPoint;
     public static int bufferSize = 4096;
 	private byte[] bytes;
 	private static String data;
-
     private Packet receivedPacket;
-    private bool connected;
+    public bool isConnected;
 
     public void ConnectTcp(TcpClient _tcpClient)
     {
@@ -24,7 +21,7 @@ public class Connection
 
         stream = tcpClient.GetStream();
 
-        connected = true;
+        isConnected = true;
 
         bytes = new byte[bufferSize];
 
@@ -53,7 +50,7 @@ public class Connection
 
             byte[] data = new byte[byteLength];
             Array.Copy(bytes, data, byteLength);
-            receivedPacket.Reset(HandleData(data));
+            receivedPacket.Reset(HandleTcpData(data));
 
             stream.BeginRead(bytes, 0, bufferSize, ReceiveCallback, null);
         }
@@ -64,7 +61,7 @@ public class Connection
         }
     }
 
-    private bool HandleData(byte[] _data)
+    private bool HandleTcpData(byte[] _data)
     {
         int packetLength = 0;
         
@@ -124,11 +121,6 @@ public class Connection
         }
     }
 
-    public void SendUDP(Packet _packet)
-    {
-
-    }
-
     public TcpClient GetTcpClient()
     {
         return tcpClient;
@@ -138,7 +130,7 @@ public class Connection
     {
         id = _newId;
 
-        connected = false;
+        isConnected = false;
     }
 
     public int GetId()
@@ -146,16 +138,40 @@ public class Connection
         return id;
     }
 
-    public bool IsConnected()
+    public void ConnectUdp(IPEndPoint _endPoint)
     {
-        return connected;
+        udpEndPoint = _endPoint;
+    }
+
+    public void SendUDP(Packet _packet)
+    {
+        Server.SendUdpData(udpEndPoint, _packet);
+    }
+
+    public void HandleUdpData(Packet _receivedPacket)
+    {
+        int packetLength = _receivedPacket.ReadInt();
+        byte[] packetBytes = _receivedPacket.ReadBytes(packetLength);
+
+        using (Packet packet = new Packet(packetBytes))
+        {
+            int packetID = packet.ReadInt();
+            Server.packetHandlers[packetID](id, packet);
+        }
     }
 
     public void Disconnect()
     {
+        udpEndPoint = null;
+        isConnected = false;
+
+        GameManager.DeletePlayer(id);
+        DataManager.Send.PlayerDisconnected(id);
+
         tcpClient.Close();
         tcpClient = null;
+
+        stream.Close();
         stream = null;
-        connected = false;
     }
 }

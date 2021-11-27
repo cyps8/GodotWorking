@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Instances/Player.tscn" type="PackedScene" id=1]
+[ext_resource path="res://Scripts/Player.cs" type="Script" id=2]
+[ext_resource path="res://Assets/Entities/white.png" type="Texture" id=3]
+
+[node name="UserPlayer" type="Node2D"]
+script = ExtResource( 2 )
+
+[node name="Player" parent="." instance=ExtResource( 1 )]
+use_parent_material = true
+
+[node name="Light2D" type="Light2D" parent="Player"]
+texture = ExtResource( 3 )
+texture_scale = 8.0
+mode = 2
+shadow_enabled = true
+shadow_filter = 3

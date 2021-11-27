@@ -4,20 +4,18 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
 public class Server : Node
 {
 	private static int port;
-
 	private static TcpListener tcpListener;
-    
+	private static UdpClient udpListener;
 	public static List<Connection> connections = new List<Connection>();
 	public delegate void PacketHandler(int _fromClient, Packet _packet);
     public static Dictionary<int, PacketHandler> packetHandlers;
-
 	public static int maxPlayers; // not including host
-
-
+	static bool isConnected;
 	public void ServerStart()
 	{
 		port = 42069;
@@ -27,11 +25,17 @@ public class Server : Node
 
 		GD.Print($"Server started on port: {port}.");
 
-		maxPlayers = 3;
+		maxPlayers = 10;
 
 		Init();
+		
+		isConnected = true;
 
 		tcpListener.BeginAcceptTcpClient(new AsyncCallback(TCPConnectCallback), null);
+
+		udpListener = new UdpClient(port);
+
+		udpListener.BeginReceive(UDPReceiveCallback, null);
 	}
 
 	private void Init()
@@ -47,42 +51,123 @@ public class Server : Node
 		{
 			{ (int)ClientPackets.welcomeReceived, DataManager.Handle.WelcomeReceived },
 			{ (int)ClientPackets.chatMsg, DataManager.Handle.ClientChatMsg },
+			{ (int)ClientPackets.playerMovement, DataManager.Handle.ClientMovement },
 			// TODO: add packets to be handled by server.
 		};
 	}
 
 	private void TCPConnectCallback(IAsyncResult result)
 	{
-		if (tcpListener == null)
-		{
-			return;
-		}
+		if (tcpListener == null || isConnected == false)
+		return;
 
-		TcpClient _client = tcpListener.EndAcceptTcpClient(result);
-		tcpListener.BeginAcceptTcpClient(new AsyncCallback(TCPConnectCallback), null);
-
-		for (int i = 0; i < maxPlayers; i++)
+		try
 		{
-			if (connections[i].GetTcpClient() == null)
+			TcpClient _client = tcpListener.EndAcceptTcpClient(result);
+			tcpListener.BeginAcceptTcpClient(new AsyncCallback(TCPConnectCallback), null);
+
+			for (int i = 0; i < maxPlayers; i++)
 			{
-				connections[i].ConnectTcp(_client);
-				GD.Print($"Connection: {_client.Client.RemoteEndPoint} set to client {connections[i].GetId()}");
-				return;
+				if (connections[i].GetTcpClient() == null)
+				{
+					connections[i].ConnectTcp(_client);
+					GD.Print($"Connection: {_client.Client.RemoteEndPoint} set to client {connections[i].GetId()}");
+					return;
+				}
 			}
+
+			GD.Print($"Failed to connect: {_client.Client.RemoteEndPoint}, Server full");
 		}
-
-		GD.Print($"Failed to connect: {_client.Client.RemoteEndPoint}, Server full");
-
+        catch (Exception _ex)
+        {
+            GD.Print($"Error receiving TCP callback: {_ex}");
+        }
 	}
+
+	private static void UDPReceiveCallback(IAsyncResult _result)
+    {
+		if (udpListener == null || isConnected == false)
+		return;
+
+        try
+        {
+            IPEndPoint clientEndPoint = new IPEndPoint(IPAddress.Any, 42069);
+            byte[] data = udpListener.EndReceive(_result, ref clientEndPoint);
+            udpListener.BeginReceive(UDPReceiveCallback, null);
+
+            if (data.Length < 4)
+            {
+                return;
+            }
+
+            using (Packet _packet = new Packet(data))
+            {
+				int clientID = _packet.ReadInt();
+
+                if (clientID == -1)
+                {
+                    return;
+                }
+
+                if (connections[clientID].udpEndPoint == null)
+                {
+                    connections[clientID].ConnectUdp(clientEndPoint);
+                    return;
+                }
+
+                if (connections[clientID].udpEndPoint.ToString() == clientEndPoint.ToString())
+                {
+                    connections[clientID].HandleUdpData(_packet);
+                }
+            }
+        }
+        catch (Exception _ex)
+        {
+            GD.Print($"Error receiving UDP data: {_ex}");
+			udpListener.Close();
+			udpListener = null;
+			for (int i = 0; i < connections.Count; i++)
+			{
+				if (!connections[i].isConnected)
+				connections[i].udpEndPoint = null;
+			}
+			udpListener = new UdpClient(port);
+			udpListener.BeginReceive(UDPReceiveCallback, null);
+        }
+    }
+
+	public static void SendUdpData(IPEndPoint _clientEndPoint, Packet _packet)
+    {
+		if (udpListener == null || isConnected == false)
+		return;
+
+        try
+        {
+            if (_clientEndPoint != null)
+            {
+                udpListener.BeginSend(_packet.ToArray(), _packet.Length(), _clientEndPoint, null, null);
+            }
+        }
+        catch (Exception _ex)
+        {
+            GD.Print($"Error sending data to {_clientEndPoint} via UDP: {_ex}");
+        }
+    }
+
 	public void ServerStop()
 	{
 		for (int i = 0; i <= maxPlayers; i++)
         {
-			if (connections[i].IsConnected())
+			if (connections[i].isConnected)
 			connections[i].Disconnect();
         }
 
+		isConnected = false;
+
 		tcpListener.Stop();
 		tcpListener = null;
+
+		udpListener.Close();
+		udpListener = null;
 	}
 }

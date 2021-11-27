@@ -3,18 +3,23 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Text;
+using System.Net;
 
 public enum ServerPackets
 {
     welcome = 1,
     playerDisconnected,
-    chatMsg
+    chatMsg,
+    newPlayer,
+    playerMovement
 }
 
 public enum ClientPackets
 {
     welcomeReceived = 1,
-    chatMsg
+    chatMsg,
+    playerMovement,
+    ignoreNext
 }
 
 public class Packet : IDisposable
@@ -58,7 +63,7 @@ public class Packet : IDisposable
 
     public void InsertInt(int _value)
     {
-        buffer.InsertRange(0, BitConverter.GetBytes(buffer.Count));
+        buffer.InsertRange(0, BitConverter.GetBytes(_value));
     }
 
     public byte[] ToArray()
@@ -107,6 +112,11 @@ public class Packet : IDisposable
     }
 
     public void Write(float _value)
+    {
+        buffer.AddRange(BitConverter.GetBytes(_value));
+    }
+
+    public void Write(long _value)
     {
         buffer.AddRange(BitConverter.GetBytes(_value));
     }
@@ -193,6 +203,22 @@ public class Packet : IDisposable
         else
         {
             throw new Exception("Could not read value of type 'float'");
+        }
+    }
+    public long ReadLong(bool _moveReadPos = true)
+    {
+        if (buffer.Count > readPos)
+        {
+            long _value = BitConverter.ToInt64(readableBuffer, readPos);
+            if (_moveReadPos)
+            {
+                readPos += 8;
+            }
+            return _value;
+        }
+        else
+        {
+            throw new Exception("Could not read value of type 'long'!");
         }
     }
 

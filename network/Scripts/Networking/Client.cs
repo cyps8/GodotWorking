@@ -7,50 +7,62 @@ using System.Text;
 public class Client : Node
 {
     private static int port;
-    private static TcpClient client;
-
+    public static TcpClient tcpClient;
+    private static UdpClient udpClient;
+    public static IPEndPoint udpEndPoint;
+    public string ip = "127.0.0.1";
     public static int id;
-
     public static int bufferSize = 4096;
-
     private static Byte[] bytes;
     private static String data;
-
     private static NetworkStream stream;
     private static bool connected = false;
-
     private delegate void PacketHandler(Packet _packet);
     private static Dictionary<int, PacketHandler> packetHandlers;
-
     private Packet receivedPacket;
+    public static bool isConnected;
+    public static bool udpConnected = false;
+    private static bool exit = false;
+    public override void _Ready()
+    {
+        exit = false;
+    }
 
-    private bool isConnected;
-    public void StartClient()
+    public override void _Process(float dt)
+    {
+        if(exit)
+        {
+            GetNode<Node>("/root/MasterScene").CallDeferred("GoToMenu");
+        }
+    }
+    public void StartClient() // All tcp stuff here
     {
         port = 42069;
 
-        client = new TcpClient();
+        tcpClient = new TcpClient();
+
+        udpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
 
         Init();
 
         receivedPacket = new Packet();
 
-        client.BeginConnect("127.0.0.1", port, ConnectCallback, client);
-
         isConnected = true;
+
+        tcpClient.BeginConnect(ip, port, ConnectCallback, tcpClient);
     }
 
     private void ConnectCallback(IAsyncResult _result)
     {
-        if (!client.Connected)
+        if (!tcpClient.Connected)
         {
             Disconnect();
             return;
         }
 
-        client.EndConnect(_result);
+        tcpClient.EndConnect(_result);
 
-        stream = client.GetStream();
+        stream = tcpClient.GetStream();
 
         connected = true;
 
@@ -64,9 +76,7 @@ public class Client : Node
     private void ReceiveCallback(IAsyncResult _result)
     {
         if(!isConnected)
-        {
-            return;
-        }
+        return;
 
         try
         {
@@ -112,7 +122,6 @@ public class Client : Node
             using (Packet packet = new Packet(packetBytes))
             {
                 int _packetID = packet.ReadInt();
-                GD.Print($"{_packetID}");
                 packetHandlers[_packetID](packet);
             }
 
@@ -138,7 +147,7 @@ public class Client : Node
     {
         try
         {
-            if (client != null)
+            if (tcpClient != null)
             {
                 IAsyncResult _result = stream.BeginWrite(_packet.ToArray(), 0, _packet.Length(), null, null);
                 stream.EndWrite(_result);
@@ -150,14 +159,73 @@ public class Client : Node
         }
     }
 
-    public static void ConnectUDP()
+    public static void ConnectUDP(int _localPort) // all udp from here downwards
     {
+        udpClient = new UdpClient(_localPort);
 
+        udpClient.BeginReceive(ReceiveUdpCallback, null);
+
+        using (Packet _packet = new Packet())
+        {
+            SendUDP(_packet);
+        }
+
+        udpConnected = true;
+    }
+
+    private static void ReceiveUdpCallback(IAsyncResult _result)
+    {
+        if (!isConnected)
+        return;
+
+        try
+        {
+            byte[] data = udpClient.EndReceive(_result, ref udpEndPoint);
+            udpClient.BeginReceive(ReceiveUdpCallback, null);
+
+            if (data.Length < 4)
+            {
+                Disconnect();
+                return;
+            }
+
+            HandleUdpData(data);
+        }
+        catch
+        {
+            Disconnect();
+        }
     }
 
     public static void SendUDP(Packet _packet)
     {
+        try
+        {
+            _packet.InsertInt(id);
+            if (udpClient != null)
+            {
+                udpClient.Send(_packet.ToArray(), _packet.Length(), udpEndPoint);
+            }
+        }
+        catch (Exception _ex)
+        {
+            GD.Print($"Error sending data to server via UDP: {_ex}");
+        }
+    }
 
+    private static void HandleUdpData(byte[] _data)
+    {
+        using (Packet packet = new Packet(_data))
+        {
+            int packetLength = packet.ReadInt();
+            _data = packet.ReadBytes(packetLength);
+        }
+
+        using (Packet packet = new Packet(_data))
+        {
+            int packetID = packet.ReadInt();
+            packetHandlers[packetID](packet);
+        }
     }
 
     private void Init()
@@ -167,19 +235,27 @@ public class Client : Node
             { (int)ServerPackets.welcome, DataManager.Handle.Welcome},
             { (int)ServerPackets.playerDisconnected, DataManager.Handle.PlayerDisconnected},
             { (int)ServerPackets.chatMsg, DataManager.Handle.ServerChatMsg},
+            { (int)ServerPackets.newPlayer, DataManager.Handle.NewPlayer},
+            { (int)ServerPackets.playerMovement, DataManager.Handle.ServerMovement},
         };
     }
-    private void Disconnect()
+    private static void Disconnect()
     {
         isConnected = false;
 
         stream = null;
 
-        client.Close();
-        client = null;
+        tcpClient.Close();
+        tcpClient = null;
+
+        udpEndPoint = null;
+        if (udpConnected)
+        udpClient.Close();
+        udpClient = null;
 
         GD.Print("Disconnected from server.");
 
-        GetNode<Node>("/root/MasterScene").Call("GoToMenu");
+        udpConnected = false;
+        exit = true;
     }
 }

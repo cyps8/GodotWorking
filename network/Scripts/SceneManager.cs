@@ -32,6 +32,7 @@ public class SceneManager : Node
 
     public void GoToMenu()
     {
+        GameManager.Clear();
         GotoScene("res://Scenes/Main.tscn");
         isServer = false;
     }

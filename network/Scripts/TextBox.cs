@@ -4,10 +4,8 @@ using System;
 public class TextBox : Node
 {
     private LineEdit textInput;
-
     private static RichTextLabel textBox;
-
-    private bool focused;
+    public static bool focused;
 
     public override void _Ready()
     {
@@ -19,6 +17,9 @@ public class TextBox : Node
     {
         if (Input.IsActionJustPressed("ui_accept") && focused == true && textInput.Text != "")
         {
+            focused = false;
+            textInput.ReleaseFocus();
+
             string msg = (SceneManager.username + ": " + textInput.Text);
             textInput.Clear();
             textBox.AddText(msg + "\n");
@@ -36,12 +37,27 @@ public class TextBox : Node
 
     public void FocusEnter()
     {
+        TBEnter();
         focused = true;
     }
 
     public void FocusExit()
     {
+        TBExit();
         focused = false;
+    }
+
+    public void TBEnter()
+    {
+        textBox.MarginTop = -200;
+        textBox.ScrollActive = true;
+    }
+
+    public void TBExit()
+    {
+        textBox.MarginTop = -100;
+        textBox.ScrollToLine(textBox.GetLineCount() - 1);
+        textBox.ScrollActive = false;
     }
 
     public static void AddMsg(string _msg)
