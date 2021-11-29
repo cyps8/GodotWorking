@@ -22,7 +22,7 @@ public class GameManager : Node2D
     public struct BValues
     {
         public Vector2 position;
-        public float rotation;
+        public Vector2 direction;
     }
 
     public static List<OPValues> otherPlayersQueue = new List<OPValues>();
@@ -63,12 +63,12 @@ public class GameManager : Node2D
         otherPlayersQueue.Add(values);
     }
 
-    public static void NewBullet(Vector2 _position, float _rotation)
+    public static void NewBullet(Vector2 _position, Vector2 _direction)
     {
         BValues values = new BValues();
 
         values.position = _position;
-        values.rotation = _rotation;
+        values.direction = _direction;
 
         bulletsQueue.Add(values);
     }
@@ -87,9 +87,9 @@ public class GameManager : Node2D
         while (bulletsQueue.Count > 0)
         {
             Bullet newBullet = bullet.Instance<Bullet>();
-            newBullet.Init(bulletsQueue[0].position, bulletsQueue[0].rotation);
-            bullets.Add(newBullet);
             AddChild(newBullet);
+            newBullet.Init(bulletsQueue[0].position, bulletsQueue[0].direction);
+            bullets.Add(newBullet);
             bulletsQueue.RemoveAt(0);
         }
 

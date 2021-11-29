@@ -234,6 +234,42 @@ public class DataManager
             }
         }
 
+        public static void ServerNewBullet(Vector2 _position, Vector2 _direction)
+        {
+            using (Packet _packet = new Packet((int)ServerPackets.newBullet))
+            {
+                _packet.Write(-1);
+                _packet.Write(_position);
+                _packet.Write(_direction);
+
+                ServerSendTCPAll(_packet);
+            }
+        }
+
+        public static void ServerSpreadNewBullet(Vector2 _position, Vector2 _direction, int _id)
+        {
+            using (Packet _packet = new Packet((int)ServerPackets.newBullet))
+            {
+                _packet.Write(_id);
+                _packet.Write(_position);
+                _packet.Write(_direction);
+
+                ServerSendTCPAll(_id, _packet);
+            }
+        }
+
+        public static void ClientNewBullet(Vector2 _position, Vector2 _direction)
+        {
+            using (Packet _packet = new Packet((int)ClientPackets.newBullet))
+            {
+                _packet.Write(Client.id);
+                _packet.Write(_position);
+                _packet.Write(_direction);
+
+                ClientSendTCP(_packet);
+            }
+        }
+
         public static void MMWelcomeReceived()
         {
             using (Packet _packet = new Packet((int)MMClientPackets.welcomeReceived))
@@ -392,6 +428,24 @@ public class DataManager
             byte[] data = _packet.ReadBytes(length);
 
             GameManager.PlayVoice(data);
+        }
+
+        public static void ClientNewBullet(int _fromClient, Packet _packet) // How a server handles a client chat message
+        {
+            Vector2 position = _packet.ReadVector2();
+            Vector2 direction = _packet.ReadVector2();
+
+            GameManager.NewBullet(position, direction);
+
+            Send.ServerSpreadNewBullet(position, direction, _fromClient);
+        }
+
+        public static void ServerNewBullet(Packet _packet) // How a client handles a server chat message
+        {
+            Vector2 position = _packet.ReadVector2();
+            Vector2 direction = _packet.ReadVector2();
+
+            GameManager.NewBullet(position, direction);
         }
 
         public static void MMWelcome(Packet _packet)

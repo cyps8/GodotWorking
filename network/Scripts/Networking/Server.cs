@@ -56,6 +56,7 @@ public class Server : Node
 			{ (int)ClientPackets.chatMsg, DataManager.Handle.ClientChatMsg },
 			{ (int)ClientPackets.playerMovement, DataManager.Handle.ClientMovement },
 			{ (int)ClientPackets.voiceChat, DataManager.Handle.ClientVoiceChat },
+			{ (int)ClientPackets.newBullet, DataManager.Handle.ClientNewBullet },
 			// TODO: add packets to be handled by server.
 		};
 	}

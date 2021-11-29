@@ -5,17 +5,21 @@ public class Bullet : Area2D
 {
     float timer;
     public bool toBeRemoved;
-    public void Init(Vector2 _position, float _rotation)
+    private Vector2 direction;
+    public void Init(Vector2 _position, Vector2 _direction)
     {
         Position = _position;
-        Rotation = _rotation;
+        direction = _direction;
+
+        LookAt(Position + direction);
+        RotationDegrees += 90;
 
         timer = 0;
         toBeRemoved = false;
     }
     public override void _PhysicsProcess(float dt)
     {
-        Position += (new Vector2(15, 0));
+        Position += direction * dt * 700;
         timer += dt;
 
         if (timer > 1)

@@ -41,7 +41,17 @@ public class Player : Node2D
         {
             if (Input.IsActionJustPressed("action1"))
             {
-                GameManager.NewBullet(kinBody.Position, Rotation);
+                Vector2 rotVec = GetGlobalMousePosition() - kinBody.Position;
+                GameManager.NewBullet(kinBody.Position, rotVec.Normalized());
+
+                if(SceneManager.isServer == true)
+                {
+                    DataManager.Send.ServerNewBullet(kinBody.Position, rotVec.Normalized());
+                }
+                else
+                {
+                    DataManager.Send.ClientNewBullet(kinBody.Position ,rotVec.Normalized());
+                }
             }
 
             if (Input.IsActionPressed("ui_right"))

@@ -12,7 +12,8 @@ public enum ServerPackets
     chatMsg,
     newPlayer,
     playerMovement,
-    voiceChat
+    voiceChat,
+    newBullet
 }
 
 public enum ClientPackets
@@ -20,7 +21,8 @@ public enum ClientPackets
     welcomeReceived = 1,
     chatMsg,
     playerMovement,
-    voiceChat
+    voiceChat,
+    newBullet
 }
 
 public enum MMServerPackets
