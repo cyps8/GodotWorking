@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=2]
+[gd_scene load_steps=10 format=2]
 
 [ext_resource path="res://Scripts/TextBox.cs" type="Script" id=1]
 [ext_resource path="res://Instances/UserPlayer.tscn" type="PackedScene" id=2]
@@ -6,6 +6,7 @@
 [ext_resource path="res://Instances/OtherPlayer.tscn" type="PackedScene" id=4]
 [ext_resource path="res://Assets/Environment/tempback.png" type="Texture" id=5]
 [ext_resource path="res://Instances/Bullet.tscn" type="PackedScene" id=6]
+[ext_resource path="res://Instances/MicRecord.tscn" type="PackedScene" id=7]
 
 [sub_resource type="OccluderPolygon2D" id=2]
 cull_mode = 1
@@ -76,6 +77,12 @@ occluder = SubResource( 2 )
 
 [node name="LightOccluder2D" type="LightOccluder2D" parent="Tempback"]
 occluder = SubResource( 1 )
+
+[node name="MicRecord" parent="." instance=ExtResource( 7 )]
+
+[node name="AudioPlayer" type="AudioStreamPlayer2D" parent="."]
+position = Vector2( -2.66968, 0 )
+autoplay = true
 
 [connection signal="focus_entered" from="HUD/TextBox/TextInput" to="HUD/TextBox" method="FocusEnter"]
 [connection signal="focus_exited" from="HUD/TextBox/TextInput" to="HUD/TextBox" method="FocusExit"]

@@ -14,9 +14,13 @@ config/name="Net work? I hope it does"
 run/main_scene="res://Scenes/MasterScene.tscn"
 config/icon="res://Assets/Entities/icon.png"
 
+[audio]
+
+enable_audio_input=true
+
 [debug]
 
-multirun/number_of_windows=3
+multirun/number_of_windows=2
 multirun/window_distance=100
 multirun/add_custom_args=true
 multirun/first_window_args="listen"
@@ -71,6 +75,11 @@ sprint={
 action1={
 "deadzone": 0.5,
 "events": [ Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"button_mask":0,"position":Vector2( 0, 0 ),"global_position":Vector2( 0, 0 ),"factor":1.0,"button_index":1,"pressed":false,"doubleclick":false,"script":null)
+ ]
+}
+voice={
+"deadzone": 0.5,
+"events": [ Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":0,"alt":false,"shift":false,"control":false,"meta":false,"command":false,"pressed":false,"scancode":86,"physical_scancode":0,"unicode":0,"echo":false,"script":null)
  ]
 }
 

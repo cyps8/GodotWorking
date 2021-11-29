@@ -11,7 +11,8 @@ public enum ServerPackets
     playerDisconnected,
     chatMsg,
     newPlayer,
-    playerMovement
+    playerMovement,
+    voiceChat
 }
 
 public enum ClientPackets
@@ -19,8 +20,23 @@ public enum ClientPackets
     welcomeReceived = 1,
     chatMsg,
     playerMovement,
-    ignoreNext
+    voiceChat
 }
+
+public enum MMServerPackets
+    {
+        welcome = 1,
+        gamesData,
+    }
+
+    public enum MMClientPackets
+    {
+        welcomeReceived = 1,
+        gameData,
+        newGame,
+        gameClosed,
+        requestData,
+    }
 
 public class Packet : IDisposable
 {

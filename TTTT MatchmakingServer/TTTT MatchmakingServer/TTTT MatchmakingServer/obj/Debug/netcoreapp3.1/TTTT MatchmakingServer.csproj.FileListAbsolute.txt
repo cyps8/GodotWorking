@@ -1,0 +1,13 @@
+C:\Users\cypri\OneDrive\Desktop\TTTT MatchmakingServer\TTTT MatchmakingServer\TTTT MatchmakingServer\bin\Debug\netcoreapp3.1\TTTT MatchmakingServer.exe
+C:\Users\cypri\OneDrive\Desktop\TTTT MatchmakingServer\TTTT MatchmakingServer\TTTT MatchmakingServer\bin\Debug\netcoreapp3.1\TTTT MatchmakingServer.deps.json
+C:\Users\cypri\OneDrive\Desktop\TTTT MatchmakingServer\TTTT MatchmakingServer\TTTT MatchmakingServer\bin\Debug\netcoreapp3.1\TTTT MatchmakingServer.runtimeconfig.json
+C:\Users\cypri\OneDrive\Desktop\TTTT MatchmakingServer\TTTT MatchmakingServer\TTTT MatchmakingServer\bin\Debug\netcoreapp3.1\TTTT MatchmakingServer.runtimeconfig.dev.json
+C:\Users\cypri\OneDrive\Desktop\TTTT MatchmakingServer\TTTT MatchmakingServer\TTTT MatchmakingServer\bin\Debug\netcoreapp3.1\TTTT MatchmakingServer.dll
+C:\Users\cypri\OneDrive\Desktop\TTTT MatchmakingServer\TTTT MatchmakingServer\TTTT MatchmakingServer\bin\Debug\netcoreapp3.1\TTTT MatchmakingServer.pdb
+C:\Users\cypri\OneDrive\Desktop\TTTT MatchmakingServer\TTTT MatchmakingServer\TTTT MatchmakingServer\obj\Debug\netcoreapp3.1\TTTT MatchmakingServer.csprojAssemblyReference.cache
+C:\Users\cypri\OneDrive\Desktop\TTTT MatchmakingServer\TTTT MatchmakingServer\TTTT MatchmakingServer\obj\Debug\netcoreapp3.1\TTTT MatchmakingServer.AssemblyInfoInputs.cache
+C:\Users\cypri\OneDrive\Desktop\TTTT MatchmakingServer\TTTT MatchmakingServer\TTTT MatchmakingServer\obj\Debug\netcoreapp3.1\TTTT MatchmakingServer.AssemblyInfo.cs
+C:\Users\cypri\OneDrive\Desktop\TTTT MatchmakingServer\TTTT MatchmakingServer\TTTT MatchmakingServer\obj\Debug\netcoreapp3.1\TTTT MatchmakingServer.csproj.CoreCompileInputs.cache
+C:\Users\cypri\OneDrive\Desktop\TTTT MatchmakingServer\TTTT MatchmakingServer\TTTT MatchmakingServer\obj\Debug\netcoreapp3.1\TTTT MatchmakingServer.dll
+C:\Users\cypri\OneDrive\Desktop\TTTT MatchmakingServer\TTTT MatchmakingServer\TTTT MatchmakingServer\obj\Debug\netcoreapp3.1\TTTT MatchmakingServer.pdb
+C:\Users\cypri\OneDrive\Desktop\TTTT MatchmakingServer\TTTT MatchmakingServer\TTTT MatchmakingServer\obj\Debug\netcoreapp3.1\TTTT MatchmakingServer.genruntimeconfig.cache

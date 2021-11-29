@@ -11,7 +11,6 @@ public class Connection
     public IPEndPoint udpEndPoint;
     public static int bufferSize = 4096;
 	private byte[] bytes;
-	private static String data;
     private Packet receivedPacket;
     public bool isConnected;
 
@@ -22,6 +21,8 @@ public class Connection
         stream = tcpClient.GetStream();
 
         isConnected = true;
+
+        DataManager.Send.MMGameData();
 
         bytes = new byte[bufferSize];
 
@@ -167,6 +168,7 @@ public class Connection
 
         GameManager.DeletePlayer(id);
         DataManager.Send.PlayerDisconnected(id);
+        DataManager.Send.MMGameData();
 
         tcpClient.Close();
         tcpClient = null;

@@ -15,6 +15,7 @@ public class Server : Node
 	public delegate void PacketHandler(int _fromClient, Packet _packet);
     public static Dictionary<int, PacketHandler> packetHandlers;
 	public static int maxPlayers; // not including host
+	public static string gameName = "MyServer";
 	static bool isConnected;
 	public void ServerStart()
 	{
@@ -25,11 +26,13 @@ public class Server : Node
 
 		GD.Print($"Server started on port: {port}.");
 
-		maxPlayers = 10;
+		maxPlayers = 7;
 
 		Init();
 		
 		isConnected = true;
+
+		DataManager.Send.MMNewGame();
 
 		tcpListener.BeginAcceptTcpClient(new AsyncCallback(TCPConnectCallback), null);
 
@@ -52,6 +55,7 @@ public class Server : Node
 			{ (int)ClientPackets.welcomeReceived, DataManager.Handle.WelcomeReceived },
 			{ (int)ClientPackets.chatMsg, DataManager.Handle.ClientChatMsg },
 			{ (int)ClientPackets.playerMovement, DataManager.Handle.ClientMovement },
+			{ (int)ClientPackets.voiceChat, DataManager.Handle.ClientVoiceChat },
 			// TODO: add packets to be handled by server.
 		};
 	}
@@ -124,14 +128,11 @@ public class Server : Node
         catch (Exception _ex)
         {
             GD.Print($"Error receiving UDP data: {_ex}");
-			udpListener.Close();
-			udpListener = null;
 			for (int i = 0; i < connections.Count; i++)
 			{
 				if (!connections[i].isConnected)
 				connections[i].udpEndPoint = null;
 			}
-			udpListener = new UdpClient(port);
 			udpListener.BeginReceive(UDPReceiveCallback, null);
         }
     }
@@ -161,6 +162,10 @@ public class Server : Node
 			if (connections[i].isConnected)
 			connections[i].Disconnect();
         }
+
+		DataManager.Send.MMGameClosed();
+
+		SceneManager.mmClient.Disconnect();
 
 		isConnected = false;
 

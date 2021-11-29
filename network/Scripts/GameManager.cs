@@ -27,6 +27,21 @@ public class GameManager : Node2D
 
     public static List<OPValues> otherPlayersQueue = new List<OPValues>();
     public static List<BValues> bulletsQueue = new List<BValues>();
+    public static AudioStreamPlayer2D audioStream;
+    private static AudioStreamSample _recording;
+
+    public override void _Ready()
+    {
+        audioStream = GetNode<AudioStreamPlayer2D>("AudioPlayer");
+        _recording = new AudioStreamSample();
+    }
+
+    public static void PlayVoice(byte[] _voiceData)
+    {
+        _recording.Data = _voiceData;
+        audioStream.Stream = _recording;
+        audioStream.Play();
+    }
 
     public static OPValues GetPlayerInfo(int index)
     {

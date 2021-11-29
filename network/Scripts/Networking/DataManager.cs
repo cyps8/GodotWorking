@@ -71,6 +71,12 @@ public class DataManager
         Client.SendUDP(_packet);
     }
 
+    private static void MMClientSendTCP(Packet _packet)
+    {
+        _packet.WriteLength();
+        MMClient.SendTCP(_packet);
+    }
+
     public class Send
     {
         public static void Welcome(int _toClient, string _msg)
@@ -191,6 +197,95 @@ public class DataManager
                 ClientSendUDP(_packet);
             }
         }
+
+        public static void ServerVoiceChat(byte[] _bytes)
+        {
+            using (Packet _packet = new Packet((int)ServerPackets.voiceChat))
+            {
+                _packet.Write(-1);
+                _packet.Write(_bytes.Length);
+                _packet.Write(_bytes);
+
+                ServerSendUDPAll(_packet);
+            }
+        }
+
+        public static void ServerSpreadVoiceChat(byte[] _bytes, int _id)
+        {
+            using (Packet _packet = new Packet((int)ServerPackets.voiceChat))
+            {
+                _packet.Write(_id);
+                _packet.Write(_bytes.Length);
+                _packet.Write(_bytes);
+
+                ServerSendUDPAll(_id, _packet);
+            }
+        }
+
+        public static void ClientVoiceChat(byte[] _bytes)
+        {
+            using (Packet _packet = new Packet((int)ClientPackets.voiceChat))
+            {
+                _packet.Write(Client.id);
+                _packet.Write(_bytes.Length);
+                _packet.Write(_bytes);
+
+                ClientSendUDP(_packet);
+            }
+        }
+
+        public static void MMWelcomeReceived()
+        {
+            using (Packet _packet = new Packet((int)MMClientPackets.welcomeReceived))
+            {
+                _packet.Write(MMClient.id);
+                _packet.Write(SceneManager.username);
+
+                MMClientSendTCP(_packet);
+            }
+        }
+
+        public static void MMNewGame()
+        {
+            using (Packet _packet = new Packet((int)MMClientPackets.newGame))
+            {
+                _packet.Write(Server.maxPlayers + 1);
+                _packet.Write(Server.gameName);
+
+                MMClientSendTCP(_packet);
+            }
+        }
+
+        public static void MMGameClosed()
+        {
+            using (Packet _packet = new Packet((int)MMClientPackets.gameClosed))
+            {
+                MMClientSendTCP(_packet);
+            }
+        }
+
+        public static void MMRequestData()
+        {
+            using (Packet _packet = new Packet((int)MMClientPackets.requestData))
+            {
+                MMClientSendTCP(_packet);
+            }
+        }
+
+        public static void MMGameData()
+        {
+            using (Packet _packet = new Packet((int)MMClientPackets.gameData))
+            {
+                int playerCount = 1;
+                for (int i = 0; i < Server.connections.Count; i++)
+                {
+                    if (Server.connections[i].isConnected)
+                    playerCount++;
+                }
+                _packet.Write(playerCount);
+                MMClientSendTCP(_packet);
+            }
+        }
     }
     public class Handle
     {
@@ -199,7 +294,7 @@ public class DataManager
             int clientIDCheck = _packet.ReadInt();
             string username = _packet.ReadString();
 
-            GD.Print($"{Server.connections[_fromClient].tcpClient.Client.RemoteEndPoint} connected successfully and is now player {_fromClient}.");
+            GD.Print($"{username} connected successfully and is now player {_fromClient}.");
             if (_fromClient != clientIDCheck)
             {
                 GD.Print($"Player {username} (ID: {_fromClient}) has assumed the wrong client ID ({clientIDCheck})!");
@@ -277,6 +372,53 @@ public class DataManager
             Vector2 pos = _packet.ReadVector2();
 
             GameManager.UpdatePlayerPos(id, pos);
+        }
+
+        public static void ClientVoiceChat(int _fromClient, Packet _packet) // How a server handles client voice chat
+        {
+            int id = _packet.ReadInt();
+            int length = _packet.ReadInt();
+            byte[] data = _packet.ReadBytes(length);
+
+            GameManager.PlayVoice(data);
+
+            Send.ServerSpreadVoiceChat(data, _fromClient);
+        }
+
+        public static void ServerVoiceChat(Packet _packet) // How a client handles server voice chat
+        {
+            int id = _packet.ReadInt();
+            int length = _packet.ReadInt();
+            byte[] data = _packet.ReadBytes(length);
+
+            GameManager.PlayVoice(data);
+        }
+
+        public static void MMWelcome(Packet _packet)
+        {
+            string _msg = _packet.ReadString();
+            int _id = _packet.ReadInt();
+
+            GD.Print($"Message from matchmaking server: {_msg}");
+            MMClient.id = _id;
+
+            Send.MMWelcomeReceived();
+        }
+
+        public static void MMGamesData(Packet _packet)
+        {
+            int gamesCount = _packet.ReadInt();
+
+            GameSelector.Clear();
+
+            for (int i = 0; i < gamesCount; i++)
+            {
+                int id = _packet.ReadInt();
+                int maxPlayers = _packet.ReadInt();
+                int playerCount = _packet.ReadInt();
+                string gameName = _packet.ReadString();
+                GameSelector.AddGame(id, maxPlayers, playerCount, gameName);
+            }
         }
     }
 }

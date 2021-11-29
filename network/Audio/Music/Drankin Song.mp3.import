@@ -1,0 +1,15 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+path="res://.import/Drankin Song.mp3-2e7fc54c39c002979af067e441defa43.mp3str"
+
+[deps]
+
+source_file="res://Audio/Music/Drankin Song.mp3"
+dest_files=[ "res://.import/Drankin Song.mp3-2e7fc54c39c002979af067e441defa43.mp3str" ]
+
+[params]
+
+loop=true
+loop_offset=0

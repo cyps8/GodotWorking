@@ -13,13 +13,13 @@ public class Main : Node2D
 	private void ButtonHostPressed()
 	{
 		SetUsername();
-		GetNode<Node>("/root/MasterScene").Call("StartServer");
+		GetNode<Node>("/root/MasterScene").Call("GoToGameCreator");
 	}
 
 	private void ButtonClientPressed()
 	{
 		SetUsername();
-		GetNode<Node>("/root/MasterScene").Call("StartClient");
+		GetNode<Node>("/root/MasterScene").Call("GoToGameSelector");
 	}
 
 	private void SetUsername()

@@ -237,6 +237,7 @@ public class Client : Node
             { (int)ServerPackets.chatMsg, DataManager.Handle.ServerChatMsg},
             { (int)ServerPackets.newPlayer, DataManager.Handle.NewPlayer},
             { (int)ServerPackets.playerMovement, DataManager.Handle.ServerMovement},
+            { (int)ServerPackets.voiceChat, DataManager.Handle.ServerVoiceChat},
         };
     }
     private static void Disconnect()
