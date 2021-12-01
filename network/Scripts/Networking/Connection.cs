@@ -166,6 +166,7 @@ public class Connection
         udpEndPoint = null;
         isConnected = false;
 
+        TextBox.PlayerDisconnected(id);
         GameManager.DeletePlayer(id);
         DataManager.Send.PlayerDisconnected(id);
         DataManager.Send.MMGameData();

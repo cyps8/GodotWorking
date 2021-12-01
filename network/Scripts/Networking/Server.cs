@@ -56,6 +56,7 @@ public class Server : Node
 			{ (int)ClientPackets.voiceChat, DataManager.Handle.ClientVoiceChat },
 			{ (int)ClientPackets.newBullet, DataManager.Handle.ClientNewBullet },
 			{ (int)ClientPackets.playerHurt, DataManager.Handle.ClientHurt },
+			{ (int)ClientPackets.playerRespawn, DataManager.Handle.ClientRespawn },
 		};
 	}
 

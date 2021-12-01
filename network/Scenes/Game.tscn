@@ -81,6 +81,21 @@ __meta__ = {
 "_edit_use_anchors_": false
 }
 
+[node name="RespawnButton" type="Button" parent="HUD"]
+modulate = Color( 1, 0.988235, 0.737255, 1 )
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -117.0
+margin_top = -67.0
+margin_right = 120.0
+margin_bottom = -37.0
+text = "RESPAWN"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
 [node name="UserPlayer" parent="." instance=ExtResource( 2 )]
 
 [node name="CanvasModulate" type="CanvasModulate" parent="."]
@@ -116,3 +131,4 @@ autoplay = true
 [connection signal="focus_exited" from="HUD/TextBox/TextInput" to="HUD/TextBox" method="FocusExit"]
 [connection signal="focus_entered" from="HUD/TextBox/TextBox" to="HUD/TextBox" method="TBEnter"]
 [connection signal="focus_exited" from="HUD/TextBox/TextBox" to="HUD/TextBox" method="TBExit"]
+[connection signal="pressed" from="HUD/RespawnButton" to="." method="RespawnPressed"]

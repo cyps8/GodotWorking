@@ -236,6 +236,7 @@ public class Client : Node
             { (int)ServerPackets.voiceChat, DataManager.Handle.ServerVoiceChat},
             { (int)ServerPackets.newBullet, DataManager.Handle.ServerNewBullet},
             { (int)ServerPackets.playerHurt, DataManager.Handle.ServerHurt},
+            { (int)ServerPackets.playerRespawn, DataManager.Handle.ServerRespawn},
         };
     }
     private static void Disconnect()

@@ -77,6 +77,16 @@ public class OtherPlayer : Node2D
         QueueFree();
     }
 
+    public void Respawn(Vector2 _pos)
+    {
+        healthPoints = 200;
+
+        oldPos = _pos;
+        newPos = _pos;
+
+        HealthStatus();
+    }
+
     private void HealthStatus()
     {
         if (healthPoints <= 0)
@@ -114,6 +124,7 @@ public class OtherPlayer : Node2D
         {
             isDead = true;
             kinBody.GetNode<CollisionShape2D>("collisionShape").SetDeferred("disabled", true);
+            GetNode<Player>("Player").StopTween();
             sprite.Modulate = new Color(0.2f, 0.2f, 0.2f);
         }
         else

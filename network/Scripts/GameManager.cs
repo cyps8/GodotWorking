@@ -58,6 +58,24 @@ public class GameManager : Node2D
         return values;
     }
 
+    public static OPValues GetPlayerIdInfo(int _id)
+    {
+        for (int i = 0; i < otherPlayers.Count; i++)
+        {
+            if (otherPlayers[i].id == _id)
+            {
+                OPValues values = new OPValues();
+                values.id = otherPlayers[i].id;
+                values.username = otherPlayers[i].myUsername;
+                values.position = otherPlayers[i].Position;
+                values.hP = otherPlayers[i].healthPoints;
+                return values;
+            }
+        }
+
+        return new OPValues(); // shouldn't happen
+    }
+
     public static void NewPlayer(int _id, string _username, Vector2 _position, float _hP)
     {
         OPValues values = new OPValues();
@@ -111,6 +129,8 @@ public class GameManager : Node2D
                 i--;
             }
         }
+
+        GetNode<Button>("HUD/RespawnButton").Visible = userPlayer.isDead;
     }
 
     public static void UpdatePlayerPos(int _id, Vector2 _pos)
@@ -123,6 +143,40 @@ public class GameManager : Node2D
                 return;
             }
         }
+    }
+
+    public static void Respawn(int _id, Vector2 _pos)
+    {
+        if(SceneManager.isServer == true)
+        {
+            if (_id == -1)
+            userPlayer.Respawn(_pos);
+        }
+        else
+        {
+            if (_id == Client.id)
+            userPlayer.Respawn(_pos);
+        }
+
+        for (int i = 0; i < otherPlayers.Count; i++)
+        {
+            if (otherPlayers[i].id == _id)
+            {
+                otherPlayers[i].Respawn(_pos);
+                return;
+            }
+        }
+    }
+
+    public void RespawnPressed()
+    {
+        Vector2 respawnPos = new Vector2(200, 0);
+        userPlayer.Respawn(respawnPos);
+
+        if(SceneManager.isServer == true)
+        DataManager.Send.ServerRespawn(-1, respawnPos);
+        else
+        DataManager.Send.ClientRespawn(Client.id, respawnPos);
     }
 
     public static void DmgPlayer(float _dmg, int _hurtId)

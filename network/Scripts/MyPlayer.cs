@@ -13,7 +13,7 @@ public class MyPlayer : Node2D
     public static float healthPoints;
     public ProgressBar healthBar;
     public Label healthStatus;
-    bool isDead;
+    public bool isDead;
     //public static Vector2 position;
     public static bool movementInputs;
     public override void _Ready()
@@ -114,6 +114,23 @@ public class MyPlayer : Node2D
 
         healthBar.Value = healthPoints;
 
+        HealthStatus();
+
+        if (!isDead)
+        GetNode<Player>("Player").Hurt();
+    }
+
+    public void Respawn(Vector2 _pos)
+    {
+        healthPoints = 200;
+
+        kinBody.Position = _pos;
+
+        HealthStatus();
+    }
+
+    private void HealthStatus()
+    {
         if (healthPoints <= 0)
         {
             healthBar.Modulate = new Color(0.2f, 0.2f, 0.2f); // Deceased
@@ -155,13 +172,14 @@ public class MyPlayer : Node2D
         {
             isDead = true;
             kinBody.GetNode<CollisionShape2D>("collisionShape").Disabled = true;
+            GetNode<Player>("Player").StopTween();
             sprite.Modulate = new Color(0.2f, 0.2f, 0.2f);
         }
         else
         {
             isDead = false;
             kinBody.GetNode<CollisionShape2D>("collisionShape").Disabled = false;
-            GetNode<Player>("Player").Hurt();
+            sprite.Modulate = new Color(1, 1, 1);
         }
     }
 }

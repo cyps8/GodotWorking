@@ -125,31 +125,37 @@ public class DataManager
             }
         }
 
-        public static void ServerChatMsg(string _msg)
+        public static void ServerChatMsg(string _msg, int _msgType)
         {
             using (Packet _packet = new Packet((int)ServerPackets.chatMsg))
             {
+                _packet.Write(-1);
                 _packet.Write(_msg);
+                _packet.Write(_msgType);
 
                 ServerSendTCPAll(_packet);
             }
         }
 
-        public static void ServerSpreadChatMsg(string _msg, int _id)
+        public static void ServerSpreadChatMsg(string _msg, int _msgType, int _id)
         {
             using (Packet _packet = new Packet((int)ServerPackets.chatMsg))
             {
+                _packet.Write(_id);
                 _packet.Write(_msg);
+                _packet.Write(_msgType);
 
                 ServerSendTCPAll(_id, _packet);
             }
         }
 
-        public static void ClientChatMsg(string _msg)
+        public static void ClientChatMsg(string _msg, int _msgType)
         {
             using (Packet _packet = new Packet((int)ClientPackets.chatMsg))
             {
+                _packet.Write(Client.id);
                 _packet.Write(_msg);
+                _packet.Write(_msgType);
 
                 ClientSendTCP(_packet);
             }
@@ -162,6 +168,7 @@ public class DataManager
                 _packet.Write(_id);
                 _packet.Write(_name);
                 _packet.Write(_pos);
+                _packet.Write(200f);
 
                 ServerSendTCPAll(_id, _packet);
             }
@@ -305,6 +312,39 @@ public class DataManager
             }
         }
 
+        public static void ServerRespawn(int _id, Vector2 _pos)
+        {
+            using (Packet _packet = new Packet((int)ServerPackets.playerRespawn))
+            {
+                _packet.Write(_id);
+                _packet.Write(_pos);
+
+                ServerSendTCPAll(_packet);
+            }
+        }
+
+        public static void ServerSpreadRespawn(int _id, Vector2 _pos)
+        {
+            using (Packet _packet = new Packet((int)ServerPackets.playerRespawn))
+            {
+                _packet.Write(_id);
+                _packet.Write(_pos);
+
+                ServerSendTCPAll(_id, _packet);
+            }
+        }
+
+        public static void ClientRespawn(int _id, Vector2 _pos)
+        {
+            using (Packet _packet = new Packet((int)ClientPackets.playerRespawn))
+            {
+                _packet.Write(_id);
+                _packet.Write(_pos);
+
+                ClientSendTCP(_packet);
+            }
+        }
+
         public static void MMWelcomeReceived()
         {
             using (Packet _packet = new Packet((int)MMClientPackets.welcomeReceived))
@@ -372,6 +412,8 @@ public class DataManager
             }
             GameManager.NewPlayer(_fromClient, username, new Vector2(0, 0), 200);
             Send.NewPlayer(username, _fromClient, new Vector2(0, 0));
+
+            TextBox.PlayerConnected(username);
         }
 
         public static void Welcome(Packet _packet)
@@ -401,23 +443,28 @@ public class DataManager
         public static void PlayerDisconnected(Packet _packet)
         {
             int _id = _packet.ReadInt();
+            TextBox.PlayerDisconnected(_id);
             GameManager.DeletePlayer(_id);
         }
 
         public static void ClientChatMsg(int _fromClient, Packet _packet) // How a server handles a client chat message
         {
+            int _from = _packet.ReadInt();
             string _msg = _packet.ReadString();
+            int _msgType = _packet.ReadInt();
 
-            TextBox.AddMsg(_msg);
+            TextBox.AddMsg(_from, _msg, _msgType);
 
-            Send.ServerSpreadChatMsg(_msg, _fromClient);
+            Send.ServerSpreadChatMsg(_msg, _msgType, _fromClient);
         }
 
         public static void ServerChatMsg(Packet _packet) // How a client handles a server chat message
         {
+            int _from = _packet.ReadInt();
             string _msg = _packet.ReadString();
+            int _msgType = _packet.ReadInt();
 
-            TextBox.AddMsg(_msg);
+            TextBox.AddMsg(_from, _msg, _msgType);
         }
 
         public static void NewPlayer(Packet _packet) // How a client handles a new player
@@ -427,6 +474,8 @@ public class DataManager
             Vector2 position = _packet.ReadVector2();
             float hP = _packet.ReadFloat();
             GameManager.NewPlayer(id, username, position, 200);
+
+            TextBox.PlayerConnected(username);
         }
 
         public static void ClientMovement(int _fromClient, Packet _packet) // How a server handles client movement
@@ -503,6 +552,25 @@ public class DataManager
             int hurtId = _packet.ReadInt();
 
             GameManager.DmgPlayer(dmg, hurtId);
+        }
+
+        public static void ClientRespawn(int _fromClient, Packet _packet) // How a server handles a client chat message
+        {
+            int id = _packet.ReadInt();
+            Vector2 pos = _packet.ReadVector2();
+
+            GameManager.Respawn(id, pos);
+
+            Send.ServerSpreadRespawn(id, pos);
+        }
+
+        public static void ServerRespawn(Packet _packet) // How a client handles a server chat message
+        {
+            int id = _packet.ReadInt();
+            
+            Vector2 pos = _packet.ReadVector2();
+
+            GameManager.Respawn(id, pos);
         }
 
         public static void MMWelcome(Packet _packet)
