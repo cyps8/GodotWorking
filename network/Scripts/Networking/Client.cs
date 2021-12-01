@@ -14,9 +14,7 @@ public class Client : Node
     public static int id;
     public static int bufferSize = 4096;
     private static Byte[] bytes;
-    private static String data;
     private static NetworkStream stream;
-    private static bool connected = false;
     private delegate void PacketHandler(Packet _packet);
     private static Dictionary<int, PacketHandler> packetHandlers;
     private Packet receivedPacket;
@@ -63,8 +61,6 @@ public class Client : Node
         tcpClient.EndConnect(_result);
 
         stream = tcpClient.GetStream();
-
-        connected = true;
 
         GetNode<Node>("/root/MasterScene/Client").Call("Connected");
 
@@ -239,6 +235,7 @@ public class Client : Node
             { (int)ServerPackets.playerMovement, DataManager.Handle.ServerMovement},
             { (int)ServerPackets.voiceChat, DataManager.Handle.ServerVoiceChat},
             { (int)ServerPackets.newBullet, DataManager.Handle.ServerNewBullet},
+            { (int)ServerPackets.playerHurt, DataManager.Handle.ServerHurt},
         };
     }
     private static void Disconnect()

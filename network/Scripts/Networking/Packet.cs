@@ -13,7 +13,8 @@ public enum ServerPackets
     newPlayer,
     playerMovement,
     voiceChat,
-    newBullet
+    newBullet,
+    playerHurt
 }
 
 public enum ClientPackets
@@ -22,7 +23,8 @@ public enum ClientPackets
     chatMsg,
     playerMovement,
     voiceChat,
-    newBullet
+    newBullet,
+    playerHurt
 }
 
 public enum MMServerPackets

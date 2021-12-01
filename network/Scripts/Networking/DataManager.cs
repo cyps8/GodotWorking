@@ -90,13 +90,15 @@ public class DataManager
 
                 _packet.Write(-1);
                 _packet.Write(SceneManager.username);
-                _packet.Write(Player.position);
+                _packet.Write(MyPlayer.kinBody.Position);
+                _packet.Write(MyPlayer.healthPoints);
 
                 for (int i = 0; i < GameManager.otherPlayers.Count; i++)
                 {
                     _packet.Write(GameManager.GetPlayerInfo(i).id);
                     _packet.Write(GameManager.GetPlayerInfo(i).username);
                     _packet.Write(GameManager.GetPlayerInfo(i).position);
+                    _packet.Write(GameManager.GetPlayerInfo(i).hP);
                 }
 
                 ServerSendTCP(_toClient, _packet);
@@ -270,6 +272,39 @@ public class DataManager
             }
         }
 
+        public static void ServerHurt(float _dmg, int _hurtId)
+        {
+            using (Packet _packet = new Packet((int)ServerPackets.playerHurt))
+            {
+                _packet.Write(_dmg);
+                _packet.Write(_hurtId);
+
+                ServerSendTCPAll(_packet);
+            }
+        }
+
+        public static void ServerSpreadHurt(float _dmg, int _hurtId, int _id)
+        {
+            using (Packet _packet = new Packet((int)ServerPackets.playerHurt))
+            {
+                _packet.Write(_dmg);
+                _packet.Write(_hurtId);
+
+                ServerSendTCPAll(_id, _packet);
+            }
+        }
+
+        public static void ClientHurt(float _dmg, int _hurtId)
+        {
+            using (Packet _packet = new Packet((int)ClientPackets.playerHurt))
+            {
+                _packet.Write(_dmg);
+                _packet.Write(_hurtId);
+
+                ClientSendTCP(_packet);
+            }
+        }
+
         public static void MMWelcomeReceived()
         {
             using (Packet _packet = new Packet((int)MMClientPackets.welcomeReceived))
@@ -335,7 +370,7 @@ public class DataManager
             {
                 GD.Print($"Player {username} (ID: {_fromClient}) has assumed the wrong client ID ({clientIDCheck})!");
             }
-            GameManager.NewPlayer(_fromClient, username, new Vector2(0, 0));
+            GameManager.NewPlayer(_fromClient, username, new Vector2(0, 0), 200);
             Send.NewPlayer(username, _fromClient, new Vector2(0, 0));
         }
 
@@ -354,7 +389,8 @@ public class DataManager
                 int id = _packet.ReadInt();
                 string username = _packet.ReadString();
                 Vector2 position = _packet.ReadVector2();
-                GameManager.NewPlayer(id, username, position);
+                float hP = _packet.ReadFloat();
+                GameManager.NewPlayer(id, username, position, hP);
             }
 
             Send.WelcomeReceived();
@@ -389,7 +425,8 @@ public class DataManager
             int id = _packet.ReadInt();
             string username = _packet.ReadString();
             Vector2 position = _packet.ReadVector2();
-            GameManager.NewPlayer(id, username, position);
+            float hP = _packet.ReadFloat();
+            GameManager.NewPlayer(id, username, position, 200);
         }
 
         public static void ClientMovement(int _fromClient, Packet _packet) // How a server handles client movement
@@ -432,20 +469,40 @@ public class DataManager
 
         public static void ClientNewBullet(int _fromClient, Packet _packet) // How a server handles a client chat message
         {
+            int id = _packet.ReadInt();
             Vector2 position = _packet.ReadVector2();
             Vector2 direction = _packet.ReadVector2();
 
-            GameManager.NewBullet(position, direction);
+            GameManager.NewBullet(position, direction, false, id);
 
             Send.ServerSpreadNewBullet(position, direction, _fromClient);
         }
 
         public static void ServerNewBullet(Packet _packet) // How a client handles a server chat message
         {
+            int id = _packet.ReadInt();
             Vector2 position = _packet.ReadVector2();
             Vector2 direction = _packet.ReadVector2();
 
-            GameManager.NewBullet(position, direction);
+            GameManager.NewBullet(position, direction, false, id);
+        }
+
+        public static void ClientHurt(int _fromClient, Packet _packet) // How a server handles a client chat message
+        {
+            float dmg = _packet.ReadFloat();
+            int hurtId = _packet.ReadInt();
+
+            GameManager.DmgPlayer(dmg, hurtId);
+
+            Send.ServerSpreadHurt(dmg, hurtId, _fromClient);
+        }
+
+        public static void ServerHurt(Packet _packet) // How a client handles a server chat message
+        {
+            float dmg = _packet.ReadFloat();
+            int hurtId = _packet.ReadInt();
+
+            GameManager.DmgPlayer(dmg, hurtId);
         }
 
         public static void MMWelcome(Packet _packet)
@@ -457,6 +514,9 @@ public class DataManager
             MMClient.id = _id;
 
             Send.MMWelcomeReceived();
+
+            if (!SceneManager.isServer)
+            Send.MMRequestData();
         }
 
         public static void MMGamesData(Packet _packet)

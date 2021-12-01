@@ -35,7 +35,7 @@ public class Connection
 
     private void ReceiveCallback(IAsyncResult _result)
     {
-        if(tcpClient == null)
+        if(tcpClient == null || !isConnected)
         {
             return;
         }

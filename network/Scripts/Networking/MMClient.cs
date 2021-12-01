@@ -13,9 +13,7 @@ public class MMClient : Node
     public static int id;
     public static int bufferSize = 4096;
     private static Byte[] bytes;
-    private static String data;
     private static NetworkStream stream;
-    private static bool connected = false;
     private delegate void PacketHandler(Packet _packet);
     private static Dictionary<int, PacketHandler> packetHandlers;
     private Packet receivedPacket;
@@ -66,8 +64,6 @@ public class MMClient : Node
         tcpClient.EndConnect(_result);
 
         stream = tcpClient.GetStream();
-
-        connected = true;
 
         bytes = new byte[bufferSize];
 

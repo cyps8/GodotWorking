@@ -14,8 +14,8 @@ public class Server : Node
 	public static List<Connection> connections = new List<Connection>();
 	public delegate void PacketHandler(int _fromClient, Packet _packet);
     public static Dictionary<int, PacketHandler> packetHandlers;
-	public static int maxPlayers; // not including host
-	public static string gameName = "MyServer";
+	public static int maxPlayers = 7; // not including host
+	public static string gameName = "My Server";
 	static bool isConnected;
 	public void ServerStart()
 	{
@@ -25,8 +25,6 @@ public class Server : Node
 		tcpListener.Start(128);
 
 		GD.Print($"Server started on port: {port}.");
-
-		maxPlayers = 7;
 
 		Init();
 		
@@ -57,7 +55,7 @@ public class Server : Node
 			{ (int)ClientPackets.playerMovement, DataManager.Handle.ClientMovement },
 			{ (int)ClientPackets.voiceChat, DataManager.Handle.ClientVoiceChat },
 			{ (int)ClientPackets.newBullet, DataManager.Handle.ClientNewBullet },
-			// TODO: add packets to be handled by server.
+			{ (int)ClientPackets.playerHurt, DataManager.Handle.ClientHurt },
 		};
 	}
 
