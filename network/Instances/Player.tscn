@@ -6,7 +6,7 @@
 [sub_resource type="CanvasItemMaterial" id=3]
 light_mode = 2
 
-[sub_resource type="CanvasItemMaterial" id=2]
+[sub_resource type="CanvasItemMaterial" id=5]
 light_mode = 2
 
 [sub_resource type="CapsuleShape2D" id=4]
@@ -39,7 +39,7 @@ __meta__ = {
 }
 
 [node name="sprite" type="Sprite" parent="."]
-material = SubResource( 2 )
+material = SubResource( 5 )
 scale = Vector2( 0.25, 0.25 )
 texture = ExtResource( 1 )
 
