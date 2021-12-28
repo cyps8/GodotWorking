@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 public class Server : Node
 {
-	private static int port;
+	public static int port;
 	private static TcpListener tcpListener;
 	private static UdpClient udpListener;
 	public static List<Connection> connections = new List<Connection>();
@@ -19,11 +19,21 @@ public class Server : Node
 	static bool isConnected;
 	public void ServerStart()
 	{
+		bool started = false;
 		port = 42069;
-
-		tcpListener = new TcpListener(IPAddress.Any, port);
-		tcpListener.Start(128);
-
+		while (!started)
+		{
+			try
+			{
+				tcpListener = new TcpListener(IPAddress.Any, port);
+				tcpListener.Start(128);
+				started = true;
+			}
+			catch
+			{
+				port++;
+			}
+		}
 		GD.Print($"Server started on port: {port}.");
 
 		Init();
@@ -48,7 +58,7 @@ public class Server : Node
 			connections[i].SetId(i);
         }
 
-		packetHandlers = new Dictionary<int, PacketHandler>()
+		packetHandlers = new Dictionary<int, PacketHandler>() // sets each ID to a method to be run
 		{
 			{ (int)ClientPackets.welcomeReceived, DataManager.Handle.WelcomeReceived },
 			{ (int)ClientPackets.chatMsg, DataManager.Handle.ClientChatMsg },
@@ -57,6 +67,7 @@ public class Server : Node
 			{ (int)ClientPackets.newBullet, DataManager.Handle.ClientNewBullet },
 			{ (int)ClientPackets.playerHurt, DataManager.Handle.ClientHurt },
 			{ (int)ClientPackets.playerRespawn, DataManager.Handle.ClientRespawn },
+			{ (int)ClientPackets.ping, DataManager.Handle.ClientPing },
 		};
 	}
 

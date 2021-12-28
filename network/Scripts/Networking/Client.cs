@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text;
 public class Client : Node
 {
+    // Variables initialised
     private static int port;
     public static TcpClient tcpClient;
     private static UdpClient udpClient;
@@ -33,13 +34,15 @@ public class Client : Node
             GetNode<Node>("/root/MasterScene").CallDeferred("GoToMenu");
         }
     }
-    public void StartClient() // All tcp stuff here
+    public void StartClient(string _ip, int _port) // This starts a TCP client connection to a specific server
     {
-        port = 42069;
+        ip = _ip;
 
-        tcpClient = new TcpClient();
+        port = _port;
 
-        udpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+        tcpClient = new TcpClient(); // TCP client initialised
+
+        udpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port); // UDP endpoint set
 
         Init();
 
@@ -47,12 +50,12 @@ public class Client : Node
 
         isConnected = true;
 
-        tcpClient.BeginConnect(ip, port, ConnectCallback, tcpClient);
+        tcpClient.BeginConnect(ip, port, ConnectCallback, tcpClient); // Start connect callback to attempt to connect to server
     }
 
-    private void ConnectCallback(IAsyncResult _result)
+    private void ConnectCallback(IAsyncResult _result) // When result received or timed out, this function is run
     {
-        if (!tcpClient.Connected)
+        if (!tcpClient.Connected) // if client failed to connect, disconnect client
         {
             Disconnect();
             return;
@@ -60,24 +63,24 @@ public class Client : Node
 
         tcpClient.EndConnect(_result);
 
-        stream = tcpClient.GetStream();
+        stream = tcpClient.GetStream(); // get stream reference from tcpclient
 
         GetNode<Node>("/root/MasterScene/Client").Call("Connected");
 
         bytes = new byte[bufferSize];
 
-        stream.BeginRead(bytes, 0, bufferSize, ReceiveCallback, null);
+        stream.BeginRead(bytes, 0, bufferSize, ReceiveCallback, null); // Start receive callback for receiving tcp packets from server
     }
 
-    private void ReceiveCallback(IAsyncResult _result)
+    private void ReceiveCallback(IAsyncResult _result) // If a packet is received, this function is called
     {
-        if(!isConnected)
+        if(!isConnected) // makes sure client is connected before proceeding
         return;
 
         try
         {
-            int byteLength = stream.EndRead(_result);
-            if (byteLength <= 0)
+            int byteLength = stream.EndRead(_result); // data received from stream
+            if (byteLength <= 0) // makes sure there is data before proceeding
             {
                 Disconnect();
                 return;
@@ -85,9 +88,9 @@ public class Client : Node
 
             byte[] data = new byte[byteLength];
             Array.Copy(bytes, data, byteLength);
-            receivedPacket.Reset(HandleData(data));
+            receivedPacket.Reset(HandleData(data)); // handles packet data
 
-            stream.BeginRead(bytes, 0, bufferSize, ReceiveCallback, null);
+            stream.BeginRead(bytes, 0, bufferSize, ReceiveCallback, null); // Restarts receive callback for receving next packet
         }
         catch (Exception ex)
         {
@@ -102,7 +105,7 @@ public class Client : Node
         
         receivedPacket.SetBytes(_data);
         
-        if (receivedPacket.UnreadLength() >= 4)
+        if (receivedPacket.UnreadLength() >= 4) // checks the packet has more than 1 byte of data
         {
             packetLength = receivedPacket.ReadInt();
             if (packetLength <= 0)
@@ -111,13 +114,13 @@ public class Client : Node
             }
         }
 
-        while (packetLength > 0 && packetLength <= receivedPacket.UnreadLength())
+        while (packetLength > 0 && packetLength <= receivedPacket.UnreadLength()) // while packet has unread data
         {
             byte[] packetBytes = receivedPacket.ReadBytes(packetLength);
 
             using (Packet packet = new Packet(packetBytes))
             {
-                int _packetID = packet.ReadInt();
+                int _packetID = packet.ReadInt(); // handles packet data depending on packet id
                 packetHandlers[_packetID](packet);
             }
 
@@ -139,14 +142,13 @@ public class Client : Node
 
         return false;
     }
-    public static void SendTCP(Packet _packet)
+    public static void SendTCP(Packet _packet) // sends packet using tcp
     {
         try
         {
             if (tcpClient != null)
             {
-                IAsyncResult _result = stream.BeginWrite(_packet.ToArray(), 0, _packet.Length(), null, null);
-                stream.EndWrite(_result);
+                stream.BeginWrite(_packet.ToArray(), 0, _packet.Length(), null, null); // data is sent to stream
             }
         }
         catch (Exception _ex)
@@ -155,11 +157,11 @@ public class Client : Node
         }
     }
 
-    public static void ConnectUDP(int _localPort) // all udp from here downwards
+    public static void ConnectUDP(int _localPort) // Connects UDP client
     {
         udpClient = new UdpClient(_localPort);
 
-        udpClient.BeginReceive(ReceiveUdpCallback, null);
+        udpClient.BeginReceive(ReceiveUdpCallback, null); // Begins receiving UDP packets
 
         using (Packet _packet = new Packet())
         {
@@ -169,7 +171,7 @@ public class Client : Node
         udpConnected = true;
     }
 
-    private static void ReceiveUdpCallback(IAsyncResult _result)
+    private static void ReceiveUdpCallback(IAsyncResult _result) // Runs if UDP packet is received
     {
         if (!isConnected)
         return;
@@ -185,7 +187,7 @@ public class Client : Node
                 return;
             }
 
-            HandleUdpData(data);
+            HandleUdpData(data); // Handles UDP data
         }
         catch
         {
@@ -200,7 +202,7 @@ public class Client : Node
             _packet.InsertInt(id);
             if (udpClient != null)
             {
-                udpClient.Send(_packet.ToArray(), _packet.Length(), udpEndPoint);
+                udpClient.Send(_packet.ToArray(), _packet.Length(), udpEndPoint); // sends UDP data to server endpoint
             }
         }
         catch (Exception _ex)
@@ -220,13 +222,13 @@ public class Client : Node
         using (Packet packet = new Packet(_data))
         {
             int packetID = packet.ReadInt();
-            packetHandlers[packetID](packet);
+            packetHandlers[packetID](packet); // Handles UDP data depending on packet ID
         }
     }
 
     private void Init()
     {
-        packetHandlers = new Dictionary<int, PacketHandler>()
+        packetHandlers = new Dictionary<int, PacketHandler>() // sets each ID to a method to be run
         {
             { (int)ServerPackets.welcome, DataManager.Handle.Welcome},
             { (int)ServerPackets.playerDisconnected, DataManager.Handle.PlayerDisconnected},
@@ -237,6 +239,8 @@ public class Client : Node
             { (int)ServerPackets.newBullet, DataManager.Handle.ServerNewBullet},
             { (int)ServerPackets.playerHurt, DataManager.Handle.ServerHurt},
             { (int)ServerPackets.playerRespawn, DataManager.Handle.ServerRespawn},
+            { (int)ServerPackets.timerSync, DataManager.Handle.SyncTimer},
+            { (int)ServerPackets.ping, DataManager.Handle.ServerPing},
         };
     }
     private static void Disconnect()

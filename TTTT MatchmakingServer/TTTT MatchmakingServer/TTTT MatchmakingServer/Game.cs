@@ -14,6 +14,12 @@ namespace TTTT_MatchmakingServer
 
         public string gameName;
 
+        public string ip;
+
+        public int port;
+
+        public int backup = -1;
+
         public Game()
         {
             playerCount = 1;
@@ -22,6 +28,11 @@ namespace TTTT_MatchmakingServer
         public void Update(int _newPlayerCount)
         {
             playerCount = _newPlayerCount;
+        }
+
+        public void AddBackup(int _id)
+        {
+            backup = _id;
         }
     }
 }

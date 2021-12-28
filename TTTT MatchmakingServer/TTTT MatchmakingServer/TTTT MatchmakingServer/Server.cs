@@ -43,13 +43,14 @@ namespace TTTT_MatchmakingServer
 				connections[i].SetId(i);
 			}
 
-			packetHandlers = new Dictionary<int, PacketHandler>()
+			packetHandlers = new Dictionary<int, PacketHandler>() // sets each ID to a method to be run
 			{
 				{ (int)MMClientPackets.welcomeReceived, DataManager.Handle.WelcomeReceived },
 				{ (int)MMClientPackets.gameData, DataManager.Handle.GameData },
 				{ (int)MMClientPackets.newGame, DataManager.Handle.NewGame },
 				{ (int)MMClientPackets.gameClosed, DataManager.Handle.GameClosed },
 				{ (int)MMClientPackets.requestData, DataManager.Handle.RequestData },
+				{ (int)MMClientPackets.attemptJoin, DataManager.Handle.AttemptJoin },
 			};
 		}
 

@@ -11,8 +11,9 @@ script = ExtResource( 2 )
 use_parent_material = true
 
 [node name="Light2D" type="Light2D" parent="Player"]
+position = Vector2( 0.314987, 18.8988 )
 texture = ExtResource( 3 )
-texture_scale = 8.0
+texture_scale = 16.0
 mode = 2
 shadow_enabled = true
 shadow_filter = 3

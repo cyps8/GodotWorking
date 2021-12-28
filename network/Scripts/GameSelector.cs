@@ -50,7 +50,6 @@ public class GameSelector : Node2D
     public void Join()
     {
         Clear();
-        SceneManager.mmClient.Disconnect();
     }
 
     public static void Refresh()

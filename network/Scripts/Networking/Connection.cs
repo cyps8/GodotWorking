@@ -2,8 +2,9 @@ using Godot;
 using System;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 
-public class Connection
+public class Connection // class for storing data of each connection to the server
 {
     private int id;
     private NetworkStream stream;

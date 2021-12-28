@@ -10,7 +10,7 @@ public class Bullet : Area2D
     public int owner;
     public void Init(Vector2 _position, Vector2 _direction, bool _isMine, int _owner)
     {
-        Position = _position;
+        Position = _position + new Vector2(0, 18);
         direction = _direction;
         isMine = _isMine;
         owner = _owner;

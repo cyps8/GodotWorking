@@ -4,7 +4,7 @@ using System.Net.Sockets;
 
 namespace TTTT_MatchmakingServer
 {
-    public class Connection
+    public class Connection // class for storing data of each connection to the server
     {
         private int id;
         private NetworkStream stream;
@@ -13,10 +13,13 @@ namespace TTTT_MatchmakingServer
         private byte[] bytes;
         private Packet receivedPacket;
         public bool isConnected;
+        public string ip;
 
         public void ConnectTcp(TcpClient _tcpClient)
         {
             tcpClient = _tcpClient;
+
+            ip = tcpClient.Client.RemoteEndPoint.ToString();
 
             stream = tcpClient.GetStream();
 
@@ -33,7 +36,7 @@ namespace TTTT_MatchmakingServer
 
         private void ReceiveCallback(IAsyncResult _result)
         {
-            if (tcpClient == null)
+            if (tcpClient == null || !isConnected)
             {
                 return;
             }

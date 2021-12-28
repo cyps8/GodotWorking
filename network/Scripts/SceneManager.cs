@@ -6,6 +6,7 @@ public class SceneManager : Node
     public static MMClient mmClient;
     public static bool isServer;
     public static string username;
+    public static int joined;
     public override void _Ready()
     {
         username = "";

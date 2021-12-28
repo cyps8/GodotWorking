@@ -15,7 +15,9 @@ public enum ServerPackets
     voiceChat,
     newBullet,
     playerHurt,
-    playerRespawn
+    playerRespawn,
+    timerSync,
+    ping
 }
 
 public enum ClientPackets
@@ -26,23 +28,26 @@ public enum ClientPackets
     voiceChat,
     newBullet,
     playerHurt,
-    playerRespawn
+    playerRespawn,
+    ping
 }
 
 public enum MMServerPackets
-    {
-        welcome = 1,
-        gamesData,
-    }
+{
+    welcome = 1,
+    gamesData,
+    sendJoin
+}
 
-    public enum MMClientPackets
-    {
-        welcomeReceived = 1,
-        gameData,
-        newGame,
-        gameClosed,
-        requestData,
-    }
+public enum MMClientPackets
+{
+    welcomeReceived = 1,
+    gameData,
+    newGame,
+    gameClosed,
+    requestData,
+    attemptJoin
+}
 
 public class Packet : IDisposable
 {

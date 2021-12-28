@@ -13,6 +13,7 @@ public class MyPlayer : Node2D
     public static float healthPoints;
     public ProgressBar healthBar;
     public Label healthStatus;
+    public Label lblPing;
     public bool isDead;
     //public static Vector2 position;
     public static bool movementInputs;
@@ -22,6 +23,8 @@ public class MyPlayer : Node2D
 
         username = GetChild(0).GetNode<Label>("username");
 
+        username.Material = null;
+
         sprite = GetChild(0).GetNode<Sprite>("sprite");
 
         kinBody = GetNode<Player>("Player");
@@ -29,6 +32,12 @@ public class MyPlayer : Node2D
         camera = GetChild(0).GetNode<Camera2D>("Camera");
 
         healthStatus = GetChild(0).GetNode<Label>("health");
+
+        lblPing = GetNode<Label>("Player/ping");
+
+        healthStatus.Material = null;
+
+        sprite.Material = null;
 
         healthBar = GetParent<Node2D>().GetNode<CanvasLayer>("HUD").GetNode<Node>("HealthBar").GetNode<ProgressBar>("HealthBar");
 
@@ -108,11 +117,14 @@ public class MyPlayer : Node2D
         }
     }
 
+    public void UpdatePing(float _newTime)
+    {
+        lblPing.Text = $"{Mathf.Round(_newTime * 1000.0f)}ms";
+    }
+
     public void Hurt(float _dmg)
     {
         healthPoints -= _dmg;
-
-        healthBar.Value = healthPoints;
 
         HealthStatus();
 
@@ -124,7 +136,7 @@ public class MyPlayer : Node2D
     {
         healthPoints = 200;
 
-        kinBody.Position = _pos;
+        kinBody.Position = GameManager.GetFreeSpawn(false);
 
         HealthStatus();
     }
@@ -167,6 +179,8 @@ public class MyPlayer : Node2D
             healthStatus.Text = "Healthy";
             healthStatus.Modulate = new Color(0, 1, 0);
         }
+
+        healthBar.Value = healthPoints;
 
         if (healthPoints <= 0)
         {

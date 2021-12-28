@@ -6,7 +6,7 @@ public class Main : Node2D
 	LineEdit nameInput;
 	public override void _Ready()
 	{
-		nameInput = GetChild(0).GetChild<LineEdit>(4);
+		nameInput = GetNode<LineEdit>("UI/NameInput");
 		nameInput.Text = SceneManager.username;
 	}
 

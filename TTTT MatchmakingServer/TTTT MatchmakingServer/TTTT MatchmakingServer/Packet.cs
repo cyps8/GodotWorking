@@ -10,6 +10,7 @@ namespace TTTT_MatchmakingServer
     {
         welcome = 1,
         gamesData,
+        sendJoin
     }
 
     public enum MMClientPackets
@@ -19,6 +20,7 @@ namespace TTTT_MatchmakingServer
         newGame,
         gameClosed,
         requestData,
+        attemptJoin
     }
 
     public class Packet : IDisposable

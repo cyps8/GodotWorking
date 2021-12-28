@@ -36,7 +36,7 @@ public class MMClient : Node
             GetNode<Node>("/root/MasterScene").CallDeferred("GoToMenu");
         }
     }
-    public void StartClient() // All tcp stuff here
+    public void StartClient()  // This starts a TCP client connection to a set Matchmaking server
     {
         exit = false;
 
@@ -53,7 +53,7 @@ public class MMClient : Node
         tcpClient.BeginConnect(ip, port, ConnectCallback, tcpClient);
     }
 
-    private void ConnectCallback(IAsyncResult _result)
+    private void ConnectCallback(IAsyncResult _result) // When result received or timed out, this function is run
     {
         if (!tcpClient.Connected)
         {
@@ -70,7 +70,7 @@ public class MMClient : Node
         stream.BeginRead(bytes, 0, bufferSize, ReceiveCallback, null);
     }
 
-    private void ReceiveCallback(IAsyncResult _result)
+    private void ReceiveCallback(IAsyncResult _result) // If a packet is received, this function is called
     {
         if(!isConnected)
         return;
@@ -173,10 +173,11 @@ public class MMClient : Node
 
     private void Init()
     {
-        packetHandlers = new Dictionary<int, PacketHandler>()
+        packetHandlers = new Dictionary<int, PacketHandler>() // sets each ID to a method to be run
         {
             { (int)MMServerPackets.welcome, DataManager.Handle.MMWelcome},
             { (int)MMServerPackets.gamesData, DataManager.Handle.MMGamesData},
+            { (int)MMServerPackets.sendJoin, DataManager.Handle.MMSendJoin},
         };
     }
     public void Disconnect()

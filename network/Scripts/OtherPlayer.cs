@@ -5,12 +5,15 @@ public class OtherPlayer : Node2D
 {
     Label username;
     Sprite sprite;
-    KinematicBody2D kinBody;
+    public KinematicBody2D kinBody;
     public int id;
     public string myUsername;
+    public Label lblPing;
+    public float ping;
     public float healthPoints;
     public Label healthStatus;
     bool isDead;
+    Vector2 prevPos;
     Vector2 oldPos;
     Vector2 newPos;
 
@@ -21,13 +24,15 @@ public class OtherPlayer : Node2D
 
         myUsername = _username;
 
-        username = GetChild(0).GetNode<Label>("username");
+        username = GetNode<Label>("Player/username");
 
-        sprite = GetChild(0).GetNode<Sprite>("sprite");
+        lblPing = GetNode<Label>("Player/ping");
+
+        sprite = GetNode<Sprite>("Player/sprite");
 
         kinBody = GetChild<KinematicBody2D>(0);
 
-        healthStatus = GetChild(0).GetNode<Label>("health");
+        healthStatus = GetNode<Label>("Player/health");
 
         username.Text = myUsername;
 
@@ -37,12 +42,14 @@ public class OtherPlayer : Node2D
 
         HealthStatus();
 
+        prevPos = Position;
         oldPos = Position;
         newPos = Position;
     }
 
     public void UpdatePos(Vector2 _pos)
     {
+        prevPos = oldPos;
         oldPos = Position;
         newPos = _pos;
         lTimer = 0f;
@@ -69,6 +76,8 @@ public class OtherPlayer : Node2D
     public override void _Process(float dt)
     {
         lTimer += dt;
+        if (lTimer > 0.05f)
+        lTimer = 0.05f;
         Position = new Vector2(Mathf.Lerp(oldPos.x, newPos.x, lTimer/0.05f), Mathf.Lerp(oldPos.y, newPos.y, lTimer/0.05f));
     }
 
@@ -85,6 +94,12 @@ public class OtherPlayer : Node2D
         newPos = _pos;
 
         HealthStatus();
+    }
+
+    public void UpdatePing(float _newTime)
+    {
+        ping = Mathf.Round(_newTime * 1000.0f);
+        lblPing.Text = $"{ping}ms";
     }
 
     private void HealthStatus()

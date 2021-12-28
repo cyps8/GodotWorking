@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=2]
+[gd_scene load_steps=3 format=2]
 
 [ext_resource path="res://Scripts/GameCreator.cs" type="Script" id=1]
+[ext_resource path="res://Assets/Themes/UITheme.tres" type="Theme" id=2]
 
 [node name="GameCreator" type="Node2D"]
 script = ExtResource( 1 )
@@ -14,6 +15,7 @@ margin_left = 45.3572
 margin_top = -70.1279
 margin_right = 143.357
 margin_bottom = -32.1279
+theme = ExtResource( 2 )
 text = "Return"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -28,6 +30,7 @@ margin_left = -137.0
 margin_top = -79.0
 margin_right = -41.0
 margin_bottom = -41.0
+theme = ExtResource( 2 )
 text = "Create"
 __meta__ = {
 "_edit_use_anchors_": false
@@ -42,6 +45,7 @@ margin_left = -90.0
 margin_top = -48.0
 margin_right = 92.0
 margin_bottom = -24.0
+theme = ExtResource( 2 )
 max_length = 14
 placeholder_text = "Server Name"
 __meta__ = {
@@ -57,6 +61,7 @@ margin_left = -86.0
 margin_top = -10.0
 margin_right = 89.0
 margin_bottom = 10.0
+theme = ExtResource( 2 )
 text = "8 Players"
 items = [ "2 Players", null, false, 0, null, "4 Players", null, false, 1, null, "8 Players", null, false, 2, null, "16 Players", null, false, 3, null ]
 selected = 2
